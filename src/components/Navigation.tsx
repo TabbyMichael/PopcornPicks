@@ -69,13 +69,15 @@ const Navigation = () => {
           {/* Sign In Button & Mobile Menu */}
           <div className="flex items-center gap-3">
             {/* Sign In Button - Movie Ticket Style */}
-            <Button 
-              variant="outline" 
-              className="hidden md:flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 border-0 text-black font-semibold rounded-full px-6 py-2 hover:from-amber-400 hover:to-orange-400 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-amber-500/25"
-            >
-              <User className="h-4 w-4" />
-              Sign In
-            </Button>
+            <Link to="/auth">
+              <Button 
+                variant="outline" 
+                className="hidden md:flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 border-0 text-black font-semibold rounded-full px-6 py-2 hover:from-amber-400 hover:to-orange-400 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-amber-500/25"
+              >
+                <User className="h-4 w-4" />
+                Sign In
+              </Button>
+            </Link>
 
             {/* Mobile Navigation */}
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -100,12 +102,14 @@ const Navigation = () => {
                     <NavContent />
                   </div>
                   
-                  <Button 
-                    className="mt-4 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-semibold hover:from-amber-400 hover:to-orange-400"
-                  >
-                    <User className="h-4 w-4 mr-2" />
-                    Sign In
-                  </Button>
+                  <Link to="/auth">
+                    <Button 
+                      className="mt-4 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-semibold hover:from-amber-400 hover:to-orange-400"
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      Sign In
+                    </Button>
+                  </Link>
                 </div>
               </SheetContent>
             </Sheet>
