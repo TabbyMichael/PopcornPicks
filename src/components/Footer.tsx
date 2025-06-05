@@ -11,17 +11,17 @@ const Footer = () => {
   ];
 
   const companyLinks = [
-    { href: "#", label: "About Us" },
-    { href: "#", label: "Careers" },
-    { href: "#", label: "Contact" },
-    { href: "#", label: "Blog" },
+    { href: "/about-us", label: "About Us" },
+    { href: "/careers", label: "Careers" },
+    { href: "/contact", label: "Contact" },
+    { href: "/blog", label: "Blog" },
   ];
 
   const supportLinks = [
-    { href: "#", label: "Help Center" },
-    { href: "#", label: "Privacy Policy" },
-    { href: "#", label: "Terms of Service" },
-    { href: "#", label: "Cookie Policy" },
+    { href: "/help-center", label: "Help Center" },
+    { href: "/privacy-policy", label: "Privacy Policy" },
+    { href: "/terms-of-service", label: "Terms of Service" },
+    { href: "/cookie-policy", label: "Cookie Policy" },
   ];
 
   const socialLinks = [
