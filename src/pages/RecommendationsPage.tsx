@@ -1,41 +1,131 @@
 
+import { useState, useEffect } from "react";
 import { Star, TrendingUp } from "lucide-react";
+import { fetchTrendingMovies, fetchMovieGenres, fetchMovieDetails } from "@/lib/tmdb";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/Navigation";
 import MovieCard from "@/components/MovieCard";
 
-const recommendationSections = [
-  {
-    title: "Because you liked Dune: Part Two",
-    reason: "Sci-Fi Adventures",
-    movies: [
-      { id: 6, title: "Blade Runner 2049", poster: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=300&h=450&fit=crop", rating: 8.0, year: 2017, genre: "Sci-Fi" },
-      { id: 7, title: "Arrival", poster: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=300&h=450&fit=crop", rating: 7.9, year: 2016, genre: "Sci-Fi" },
-      { id: 8, title: "Interstellar", poster: "https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?w=300&h=450&fit=crop", rating: 8.6, year: 2014, genre: "Sci-Fi" },
-    ]
-  },
-  {
-    title: "Trending in Action",
-    reason: "Popular right now",
-    movies: [
-      { id: 9, title: "John Wick: Chapter 4", poster: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=300&h=450&fit=crop", rating: 7.8, year: 2023, genre: "Action" },
-      { id: 10, title: "Mission: Impossible 7", poster: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=300&h=450&fit=crop", rating: 7.7, year: 2023, genre: "Action" },
-      { id: 11, title: "Fast X", poster: "https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?w=300&h=450&fit=crop", rating: 6.9, year: 2023, genre: "Action" },
-    ]
-  },
-  {
-    title: "Highly Rated Dramas",
-    reason: "Critics' favorites",
-    movies: [
-      { id: 12, title: "The Power of the Dog", poster: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=300&h=450&fit=crop", rating: 7.4, year: 2021, genre: "Drama" },
-      { id: 13, title: "Nomadland", poster: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=300&h=450&fit=crop", rating: 7.3, year: 2020, genre: "Drama" },
-      { id: 14, title: "Parasite", poster: "https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?w=300&h=450&fit=crop", rating: 8.5, year: 2019, genre: "Drama" },
-    ]
-  }
-];
-
 const RecommendationsPage = () => {
+  const [recommendationSections, setRecommendationSections] = useState<Array<{
+    title: string;
+    reason: string;
+    movies: Array<{
+      id: number;
+      title: string;
+      poster: string;
+      rating: number;
+      year: number;
+      genre: string;
+    }>;
+  }>>([]);
+  const [genres, setGenres] = useState<Map<number, string>>(new Map());
+
+  useEffect(() => {
+    const getGenres = async () => {
+      const tmdbGenres = await fetchMovieGenres();
+      const map = new Map<number, string>();
+      tmdbGenres.forEach((genre: { id: number; name: string }) => {
+        map.set(genre.id, genre.name);
+      });
+      setGenres(map);
+    };
+    getGenres();
+  }, []);
+
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      const sections = [];
+
+      // Example: Trending Movies
+      const trendingMovies = await fetchTrendingMovies();
+      if (trendingMovies && trendingMovies.length > 0) {
+        sections.push({
+          title: "Trending Now",
+          reason: "Popular right now",
+          movies: trendingMovies.slice(0, 6).map((movie: {
+            id: number;
+            title: string;
+            poster_path: string | null;
+            vote_average: number;
+            release_date: string;
+            genre_ids: number[];
+          }) => ({
+            id: movie.id,
+            title: movie.title,
+            poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : "",
+            rating: movie.vote_average ? parseFloat(movie.vote_average.toFixed(1)) : 0,
+            year: movie.release_date ? new Date(movie.release_date).getFullYear() : 0,
+            genre: movie.genre_ids && movie.genre_ids.length > 0 ? movie.genre_ids.map((id: number) => genres.get(id)).filter(Boolean).join(", ") : "N/A",
+          })),
+        });
+      }
+
+      // Example: Recommendations based on a specific movie (e.g., Dune: Part Two - ID 507089)
+      const duneMovieId = 507089; // Replace with a dynamic way to get user's liked movie
+      const duneMovieDetails = await fetchMovieDetails(duneMovieId);
+      if (duneMovieDetails && duneMovieDetails.recommendations && duneMovieDetails.recommendations.results.length > 0) {
+        sections.push({
+          title: `Because you liked ${duneMovieDetails.title}`,
+          reason: "Similar tastes",
+          movies: duneMovieDetails.recommendations.results.slice(0, 6).map((movie: {
+            id: number;
+            title: string;
+            poster_path: string | null;
+            vote_average: number;
+            release_date: string;
+            genre_ids: number[];
+          }) => ({
+            id: movie.id,
+            title: movie.title,
+            poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : "",
+            rating: movie.vote_average ? parseFloat(movie.vote_average.toFixed(1)) : 0,
+            year: movie.release_date ? new Date(movie.release_date).getFullYear() : 0,
+            genre: movie.genre_ids && movie.genre_ids.length > 0 ? movie.genre_ids.map((id: number) => genres.get(id)).filter(Boolean).join(", ") : "N/A",
+          })),
+        });
+      }
+
+      // Example: Highly Rated Dramas (fetch popular movies and filter by genre)
+      // This would require a more advanced TMDB API call or client-side filtering of a larger dataset
+      // For now, let's just add a placeholder or fetch another trending list
+      const popularMovies = await fetchTrendingMovies(); // Re-using trending for simplicity
+      const dramaGenreId = Array.from(genres.entries()).find(([key, value]) => value === "Drama")?.[0];
+      if (popularMovies && popularMovies.length > 0 && dramaGenreId) {
+        const highlyRatedDramas = popularMovies.filter((movie: { genre_ids?: number[] }) => movie.genre_ids && movie.genre_ids.includes(dramaGenreId))
+                                              .sort((a: { vote_average: number }, b: { vote_average: number }) => b.vote_average - a.vote_average)
+                                              .slice(0, 6);
+        if (highlyRatedDramas.length > 0) {
+          sections.push({
+            title: "Highly Rated Dramas",
+            reason: "Critics' favorites",
+            movies: highlyRatedDramas.map((movie: {
+              id: number;
+              title: string;
+              poster_path: string | null;
+              vote_average: number;
+              release_date: string;
+              genre_ids: number[];
+            }) => ({
+              id: movie.id,
+              title: movie.title,
+              poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : "",
+              rating: movie.vote_average ? parseFloat(movie.vote_average.toFixed(1)) : 0,
+              year: movie.release_date ? new Date(movie.release_date).getFullYear() : 0,
+              genre: movie.genre_ids && movie.genre_ids.length > 0 ? movie.genre_ids.map((id: number) => genres.get(id)).filter(Boolean).join(", ") : "N/A",
+            })),
+          });
+        }
+      }
+
+      setRecommendationSections(sections);
+    };
+
+    if (genres.size > 0) { // Only fetch recommendations once genres are loaded
+      fetchRecommendations();
+    }
+  }, [genres]);
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       <Navigation />

@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { fetchMovieGenres, searchMovies } from "@/lib/tmdb";
 import { useSearchParams } from "react-router-dom";
 import { Search, Filter, Star } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -10,53 +11,71 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Navigation from "@/components/Navigation";
 import MovieCard from "@/components/MovieCard";
 
-const allMovies = [
-  { id: 1, title: "Dune: Part Two", poster: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=300&h=450&fit=crop", rating: 8.5, year: 2024, genre: "Sci-Fi" },
-  { id: 2, title: "Oppenheimer", poster: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=300&h=450&fit=crop", rating: 8.8, year: 2023, genre: "Drama" },
-  { id: 3, title: "The Batman", poster: "https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?w=300&h=450&fit=crop", rating: 8.2, year: 2022, genre: "Action" },
-  { id: 4, title: "Spider-Man: No Way Home", poster: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=300&h=450&fit=crop", rating: 8.4, year: 2021, genre: "Action" },
-  { id: 5, title: "Top Gun: Maverick", poster: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=300&h=450&fit=crop", rating: 8.6, year: 2022, genre: "Action" },
-  { id: 6, title: "Everything Everywhere All at Once", poster: "https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?w=300&h=450&fit=crop", rating: 8.1, year: 2022, genre: "Sci-Fi" },
-  { id: 7, title: "The Whale", poster: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=300&h=450&fit=crop", rating: 7.7, year: 2022, genre: "Drama" },
-  { id: 8, title: "Avatar: The Way of Water", poster: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=300&h=450&fit=crop", rating: 7.9, year: 2022, genre: "Sci-Fi" },
-];
+// Remove duplicate import since it's already imported above
 
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [selectedGenre, setSelectedGenre] = useState("all");
   const [ratingRange, setRatingRange] = useState([0, 10]);
-  const [yearRange, setYearRange] = useState([2020, 2024]);
-  const [filteredMovies, setFilteredMovies] = useState(allMovies);
+  const [yearRange, setYearRange] = useState([2000, 2024]);
+  const [filteredMovies, setFilteredMovies] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [genres, setGenres] = useState<{ id: number; name: string }[]>([]);
+  const [genreMap, setGenreMap] = useState<Map<number, string>>(new Map());
 
   useEffect(() => {
-    let filtered = allMovies;
+    const getGenres = async () => {
+      const tmdbGenres = await fetchMovieGenres();
+      setGenres(tmdbGenres);
+      const map = new Map<number, string>();
+      tmdbGenres.forEach((genre: { id: number; name: string }) => {
+        map.set(genre.id, genre.name);
+      });
+      setGenreMap(map);
+    };
+    getGenres();
+  }, []);
 
-    // Filter by search query
-    if (searchQuery) {
+  useEffect(() => {
+    const fetchAndFilterMovies = async () => {
+      setLoading(true);
+      let movies = [];
+      if (searchQuery) {
+        movies = await searchMovies(searchQuery);
+      }
+
+      let filtered = movies.map(movie => ({
+        id: movie.id,
+        title: movie.title,
+        poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : "",
+        rating: movie.vote_average ? parseFloat(movie.vote_average.toFixed(1)) : 0,
+        year: movie.release_date ? new Date(movie.release_date).getFullYear() : 0,
+        genre: movie.genre_ids && movie.genre_ids.length > 0 ? movie.genre_ids.map((id: number) => genreMap.get(id)).filter(Boolean).join(", ") : "N/A",
+      }));
+
+      // Filter by genre
+      if (selectedGenre !== "all") {
+        filtered = filtered.filter(movie => movie.genre.includes(selectedGenre));
+      }
+
+      // Filter by rating
       filtered = filtered.filter(movie =>
-        movie.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        movie.genre.toLowerCase().includes(searchQuery.toLowerCase())
+        movie.rating >= ratingRange[0] && movie.rating <= ratingRange[1]
       );
-    }
 
-    // Filter by genre
-    if (selectedGenre !== "all") {
-      filtered = filtered.filter(movie => movie.genre === selectedGenre);
-    }
+      // Filter by year
+      filtered = filtered.filter(movie => {
+        const movieYear = movie.year;
+        return movieYear >= yearRange[0] && movieYear <= yearRange[1];
+      });
 
-    // Filter by rating
-    filtered = filtered.filter(movie =>
-      movie.rating >= ratingRange[0] && movie.rating <= ratingRange[1]
-    );
+      setFilteredMovies(filtered);
+      setLoading(false);
+    };
 
-    // Filter by year
-    filtered = filtered.filter(movie =>
-      movie.year >= yearRange[0] && movie.year <= yearRange[1]
-    );
-
-    setFilteredMovies(filtered);
-  }, [searchQuery, selectedGenre, ratingRange, yearRange]);
+    fetchAndFilterMovies();
+  }, [searchQuery, selectedGenre, ratingRange, yearRange, genreMap]);
 
   const handleSearch = () => {
     setSearchParams(searchQuery ? { q: searchQuery } : {});
@@ -108,11 +127,11 @@ const SearchPage = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Genres</SelectItem>
-                      <SelectItem value="Action">Action</SelectItem>
-                      <SelectItem value="Drama">Drama</SelectItem>
-                      <SelectItem value="Sci-Fi">Sci-Fi</SelectItem>
-                      <SelectItem value="Comedy">Comedy</SelectItem>
-                      <SelectItem value="Horror">Horror</SelectItem>
+                      {genres.map((genre) => (
+                        <SelectItem key={genre.id} value={genre.name}>
+                          {genre.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -148,28 +167,18 @@ const SearchPage = () => {
             </CardContent>
           </Card>
 
-          {/* Results */}
-          <div className="mb-4">
-            <p className="text-gray-300">
-              Found {filteredMovies.length} movie{filteredMovies.length !== 1 ? "s" : ""}
-            </p>
+          {/* Movie Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {loading ? (
+              <div className="col-span-full text-center text-white">Loading...</div>
+            ) : filteredMovies.length > 0 ? (
+              filteredMovies.map((movie) => (
+                <MovieCard key={movie.id} movie={movie} />
+              ))
+            ) : (
+              <div className="col-span-full text-center text-white">No movies found.</div>
+            )}
           </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {filteredMovies.map((movie) => (
-              <MovieCard key={movie.id} movie={movie} />
-            ))}
-          </div>
-
-          {filteredMovies.length === 0 && (
-            <div className="text-center py-12">
-              <div className="mx-auto h-24 w-24 rounded-full bg-slate-800 flex items-center justify-center mb-4">
-                <Search className="h-12 w-12 text-gray-400" />
-              </div>
-              <p className="text-xl text-gray-400">No movies found</p>
-              <p className="text-gray-500 mt-2">Try adjusting your search criteria</p>
-            </div>
-          )}
         </div>
       </div>
     </div>

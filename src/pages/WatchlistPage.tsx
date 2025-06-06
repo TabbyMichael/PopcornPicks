@@ -1,5 +1,6 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { fetchMovieDetails } from "@/lib/tmdb";
 import { Bookmark, Star, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,14 +8,30 @@ import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/Navigation";
 import MovieCard from "@/components/MovieCard";
 
-const watchlistMovies = [
-  { id: 1, title: "Dune: Part Two", poster: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=300&h=450&fit=crop", rating: 8.5, year: 2024, genre: "Sci-Fi", userRating: 0 },
-  { id: 3, title: "The Batman", poster: "https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?w=300&h=450&fit=crop", rating: 8.2, year: 2022, genre: "Action", userRating: 4 },
-  { id: 5, title: "Top Gun: Maverick", poster: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=300&h=450&fit=crop", rating: 8.6, year: 2022, genre: "Action", userRating: 5 },
-];
-
 const WatchlistPage = () => {
-  const [movies, setMovies] = useState(watchlistMovies);
+  const [movies, setMovies] = useState([]);
+  const [watchlistMovieIds, setWatchlistMovieIds] = useState([1, 3, 5]); // Example: These would come from user's saved watchlist
+
+  useEffect(() => {
+    const fetchWatchlistMovies = async () => {
+      const fetchedMovies = await Promise.all(
+        watchlistMovieIds.map(async (id) => {
+          const movie = await fetchMovieDetails(id);
+          return movie ? {
+            id: movie.id,
+            title: movie.title,
+            poster: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+            rating: movie.vote_average ? parseFloat(movie.vote_average.toFixed(1)) : 0,
+            year: movie.release_date ? new Date(movie.release_date).getFullYear() : 0,
+            genre: movie.genres && movie.genres.length > 0 ? movie.genres[0].name : "N/A",
+            userRating: 0 // Initialize user rating
+          } : null;
+        })
+      );
+      setMovies(fetchedMovies.filter(Boolean));
+    };
+    fetchWatchlistMovies();
+  }, [watchlistMovieIds]);
 
   const removeFromWatchlist = (movieId: number) => {
     setMovies(movies.filter(movie => movie.id !== movieId));

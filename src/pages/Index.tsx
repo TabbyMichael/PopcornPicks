@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { fetchTrendingMovies } from "@/lib/tmdb";
 import { Search, TrendingUp, Zap, Target, Download, ArrowDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,55 +12,25 @@ import TestimonialsCarousel from "@/components/TestimonialsCarousel";
 import NewsletterSignup from "@/components/NewsletterSignup";
 import Footer from "@/components/Footer";
 
-const trendingMovies = [
-  {
-    id: 1,
-    title: "Dune: Part Two",
-    poster: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=300&h=450&fit=crop",
-    rating: 8.5,
-    year: 2024,
-    genre: "Sci-Fi"
-  },
-  {
-    id: 2,
-    title: "Oppenheimer",
-    poster: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=300&h=450&fit=crop",
-    rating: 8.8,
-    year: 2023,
-    genre: "Drama"
-  },
-  {
-    id: 3,
-    title: "The Batman",
-    poster: "https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?w=300&h=450&fit=crop",
-    rating: 8.2,
-    year: 2022,
-    genre: "Action"
-  },
-  {
-    id: 4,
-    title: "Spider-Man: No Way Home",
-    poster: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=300&h=450&fit=crop",
-    rating: 8.4,
-    year: 2021,
-    genre: "Action"
-  },
-  {
-    id: 5,
-    title: "Top Gun: Maverick",
-    poster: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=300&h=450&fit=crop",
-    rating: 8.6,
-    year: 2022,
-    genre: "Action"
-  }
-];
-
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isVisible, setIsVisible] = useState(false);
+  const [trendingMovies, setTrendingMovies] = useState([]);
 
   useEffect(() => {
     setIsVisible(true);
+    const getTrendingMovies = async () => {
+      const movies = await fetchTrendingMovies();
+      setTrendingMovies(movies.map(movie => ({
+        id: movie.id,
+        title: movie.title,
+        poster: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+        rating: movie.vote_average ? parseFloat(movie.vote_average.toFixed(1)) : 0,
+        year: movie.release_date ? new Date(movie.release_date).getFullYear() : 0,
+        genre: movie.genre_ids && movie.genre_ids.length > 0 ? movie.genre_ids[0].toString() : "N/A" // Placeholder, ideally map to genre names
+      })));
+    };
+    getTrendingMovies();
   }, []);
 
   const scrollToContent = () => {
