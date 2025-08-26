@@ -1,12 +1,12 @@
 
 import { useState, useEffect } from "react";
-import { fetchTrendingMovies } from "@/lib/tmdb";
+import { fetchTrendingMovies, fetchMovieGenres, TMDBMovie, TMDBGenre, getGenreName } from "@/lib/tmdb";
 import { Search, TrendingUp, Zap, Target, Download, ArrowDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
-import MovieCard from "@/components/MovieCard";
+import MovieCard, { Movie } from "@/components/MovieCard";
 import WhyChooseUs from "@/components/WhyChooseUs";
 import TestimonialsCarousel from "@/components/TestimonialsCarousel";
 import NewsletterSignup from "@/components/NewsletterSignup";
@@ -15,22 +15,48 @@ import Footer from "@/components/Footer";
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isVisible, setIsVisible] = useState(false);
-  const [trendingMovies, setTrendingMovies] = useState([]);
+  const [trendingMovies, setTrendingMovies] = useState<Movie[]>([]);
+  const [genres, setGenres] = useState<TMDBGenre[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsVisible(true);
-    const getTrendingMovies = async () => {
-      const movies = await fetchTrendingMovies();
-      setTrendingMovies(movies.map(movie => ({
-        id: movie.id,
-        title: movie.title,
-        poster: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
-        rating: movie.vote_average ? parseFloat(movie.vote_average.toFixed(1)) : 0,
-        year: movie.release_date ? new Date(movie.release_date).getFullYear() : 0,
-        genre: movie.genre_ids && movie.genre_ids.length > 0 ? movie.genre_ids[0].toString() : "N/A" // Placeholder, ideally map to genre names
-      })));
+    
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch genres and movies concurrently
+        const [moviesData, genresData] = await Promise.all([
+          fetchTrendingMovies(),
+          fetchMovieGenres()
+        ]);
+        
+        setGenres(genresData);
+        
+        // Map TMDB movie data to our Movie interface with genre names
+        const mappedMovies: Movie[] = moviesData.map((movie: TMDBMovie) => ({
+          id: movie.id,
+          title: movie.title,
+          poster_path: movie.poster_path,
+          vote_average: movie.vote_average,
+          release_date: movie.release_date,
+          genre_ids: movie.genre_ids,
+          genreName: getGenreName(movie.genre_ids, genresData)
+        }));
+        
+        setTrendingMovies(mappedMovies);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to load movies. Please check your API configuration.');
+      } finally {
+        setLoading(false);
+      }
     };
-    getTrendingMovies();
+    
+    fetchData();
   }, []);
 
   const scrollToContent = () => {
@@ -126,17 +152,40 @@ const Index = () => {
           </div>
           
           <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide snap-x snap-mandatory">
-            {trendingMovies.map((movie, index) => (
-              <div 
-                key={movie.id} 
-                className={`flex-none w-72 snap-center transition-all duration-700 ${
-                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                }`}
-                style={{ transitionDelay: `${index * 100}ms` }}
-              >
-                <MovieCard movie={movie} />
+            {loading ? (
+              // Loading skeleton
+              Array.from({ length: 6 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="flex-none w-72 snap-center"
+                >
+                  <div className="bg-slate-800/50 rounded-lg h-96 animate-pulse"></div>
+                </div>
+              ))
+            ) : error ? (
+              <div className="w-full text-center py-12">
+                <p className="text-red-400 text-lg mb-4">{error}</p>
+                <p className="text-gray-400">
+                  Make sure you have added your TMDB API key to the .env.local file.
+                </p>
               </div>
-            ))}
+            ) : trendingMovies.length === 0 ? (
+              <div className="w-full text-center py-12">
+                <p className="text-gray-400 text-lg">No movies found.</p>
+              </div>
+            ) : (
+              trendingMovies.map((movie, index) => (
+                <div
+                  key={movie.id}
+                  className={`flex-none w-72 snap-center transition-all duration-700 ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  }`}
+                  style={{ transitionDelay: `${index * 100}ms` }}
+                >
+                  <MovieCard movie={movie} />
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

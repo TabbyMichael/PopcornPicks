@@ -1,104 +1,260 @@
 import React from 'react';
+import { FileText, UserCheck, Scale, Shield, AlertCircle, Globe } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
 
 const TermsOfServicePage: React.FC = () => {
+  const sections = [
+    {
+      id: 'acceptance',
+      title: 'Acceptance of Terms',
+      icon: UserCheck,
+      content: [
+        'By accessing PopcornPicks, you agree to these Terms of Service',
+        'You must be at least 13 years old to use our service',
+        'If you disagree with any terms, please discontinue use immediately',
+        'These terms constitute a binding agreement between you and PopcornPicks'
+      ]
+    },
+    {
+      id: 'service-usage',
+      title: 'Service Usage',
+      icon: Globe,
+      content: [
+        'PopcornPicks provides movie discovery and recommendation services',
+        'You may create an account to access personalized features',
+        'Use the service only for lawful purposes and personal enjoyment',
+        'Do not attempt to reverse engineer or compromise our systems'
+      ]
+    },
+    {
+      id: 'user-responsibilities',
+      title: 'User Responsibilities',
+      icon: Shield,
+      content: [
+        'Provide accurate information when creating your account',
+        'Keep your login credentials secure and confidential',
+        'Report any unauthorized use of your account immediately',
+        'Respect intellectual property rights of movie content and our platform'
+      ]
+    },
+    {
+      id: 'prohibited-activities',
+      title: 'Prohibited Activities',
+      icon: AlertCircle,
+      content: [
+        'Do not share copyrighted movie content through our platform',
+        'Avoid spamming, harassment, or inappropriate behavior',
+        'Do not use automated tools to scrape or abuse our service',
+        'Do not attempt to gain unauthorized access to user accounts or data'
+      ]
+    },
+    {
+      id: 'intellectual-property',
+      title: 'Intellectual Property',
+      icon: FileText,
+      content: [
+        'PopcornPicks and our logo are trademarks of our company',
+        'Movie data and images are provided by third-party services',
+        'User-generated content (reviews, ratings) remains your property',
+        'We reserve rights to our platform design, code, and algorithms'
+      ]
+    },
+    {
+      id: 'liability-disclaimers',
+      title: 'Liability & Disclaimers',
+      icon: Scale,
+      content: [
+        'Service is provided "as is" without warranties of any kind',
+        'We are not responsible for accuracy of third-party movie information',
+        'Limitation of liability to the maximum extent permitted by law',
+        'No liability for indirect, incidental, or consequential damages'
+      ]
+    }
+  ];
+
+  const keyPoints = [
+    {
+      title: 'Free Service',
+      description: 'PopcornPicks is free to use with no hidden fees',
+      icon: '🎬'
+    },
+    {
+      title: 'Fair Use',
+      description: 'Use our service responsibly and respect other users',
+      icon: '🤝'
+    },
+    {
+      title: 'Data Protection',
+      description: 'Your privacy is protected under our Privacy Policy',
+      icon: '🔐'
+    },
+    {
+      title: 'Updates',
+      description: 'Terms may be updated with notice to users',
+      icon: '📋'
+    }
+  ];
+
   return (
-    <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto text-center">
-        <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">Terms of Service</h1>
-        <p className="mt-5 text-xl text-gray-500">Please read these terms and conditions carefully before using Our Service.</p>
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900">
+      <Navigation />
+      
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-black/50" />
+          <div 
+            className="w-full h-full opacity-20"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+            }}
+          />
+        </div>
+        
+        <div className="relative container mx-auto px-4 py-24 sm:px-6 lg:px-8">
+          <div className="text-center max-w-4xl mx-auto">
+            <div className="flex justify-center mb-6">
+              <div className="p-4 bg-white/10 backdrop-blur-sm rounded-full">
+                <FileText className="h-12 w-12 text-purple-400" />
+              </div>
+            </div>
+            <h1 className="text-5xl md:text-7xl font-bold mb-6">
+              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+                Terms of Service
+              </span>
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-300 mb-8 leading-relaxed">
+              These terms govern your use of PopcornPicks. Please read them carefully to understand your rights and responsibilities.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 px-4 py-2">
+                Effective: August 26, 2024
+              </Badge>
+              <Badge className="bg-green-500/20 text-green-300 border-green-500/30 px-4 py-2">
+                Version 2.1
+              </Badge>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-12 max-w-3xl mx-auto bg-white shadow overflow-hidden sm:rounded-lg p-6 prose prose-lg text-gray-500">
-        <p>
-          These are the Terms and Conditions governing the use of this Service and the agreement that operates between You and the Company. These Terms and Conditions set out the rights and obligations of all users regarding the use of the Service.
-        </p>
-        <p>
-          Your access to and use of the Service is conditioned on Your acceptance of and compliance with these Terms and Conditions. These Terms and Conditions apply to all visitors, users and others who access or use the Service.
-        </p>
-        <p>
-          By accessing or using the Service You agree to be bound by these Terms and Conditions. If You disagree with any part of these Terms and Conditions then You may not access the Service.
-        </p>
-        <p>
-          You represent that you are over the age of 18. The Company does not permit those under 18 to use the Service.
-        </p>
-        <p>
-          Your access to and use of the Service is also conditioned on Your acceptance of and compliance with the Privacy Policy of the Company. Our Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your personal information when You use the Application or the Website and tells You about Your privacy rights and how the law protects You. Please read Our Privacy Policy carefully before using Our Service.
-        </p>
-        <h2>Links to Other Websites</h2>
-        <p>
-          Our Service may contain links to third-party web sites or services that are not owned or controlled by the Company.
-        </p>
-        <p>
-          The Company has no control over, and assumes no responsibility for, the content, privacy policies, or practices of any third party web sites or services. You further acknowledge and agree that the Company shall not be responsible or liable, directly or indirectly, for any damage or loss caused or alleged to be caused by or in connection with the use of or reliance on any such content, goods or services available on or through any such web sites or services.
-        </p>
-        <p>
-          We strongly advise You to read the terms and conditions and privacy policies of any third-party web sites or services that You visit.
-        </p>
-        <h2>Termination</h2>
-        <p>
-          We may terminate or suspend Your access immediately, without prior notice or liability, for any reason whatsoever, including without limitation if You breach these Terms and Conditions.
-        </p>
-        <p>
-          Upon termination, Your right to use the Service will cease immediately.
-        </p>
-        <h2>Limitation of Liability</h2>
-        <p>
-          Notwithstanding any damages that You might incur, the entire liability of the Company and any of its suppliers under any provision of this Terms and Your exclusive remedy for all of the foregoing shall be limited to the amount actually paid by You through the Service or 100 USD if You haven't purchased anything through the Service.
-        </p>
-        <p>
-          To the maximum extent permitted by applicable law, in no event shall the Company or its suppliers be liable for any special, incidental, indirect, or consequential damages whatsoever (including, but not limited to, damages for loss of profits, loss of data or other information, for business interruption, for personal injury, loss of privacy arising out of or in any way related to the use of or inability to use the Service, third-party software and/or third-party hardware used with the Service, or otherwise in connection with any provision of this Terms), even if the Company or any supplier has been advised of the possibility of such damages and even if the remedy fails of its essential purpose.
-        </p>
-        <h2>"AS IS" and "AS AVAILABLE" Disclaimer</h2>
-        <p>
-          The Service is provided to You "AS IS" and "AS AVAILABLE" and with all faults and defects without warranty of any kind. To the maximum extent permitted under applicable law, the Company, on its own behalf and on behalf of its Affiliates and its and their respective licensors and service providers, expressly disclaims all warranties, whether express, implied, statutory or otherwise, with respect to the Service, including all implied warranties of merchantability, fitness for a particular purpose, title and non-infringement, and warranties that may arise out of course of dealing, course of performance, usage or trade practice. Without limitation to the foregoing, the Company provides no warranty or undertaking, and makes no representation of any kind that the Service will meet Your requirements, achieve any intended results, be compatible or work with any other software, applications, systems or services, operate without interruption, meet any performance or reliability standards or be error free or that any errors or defects can or will be corrected.
-        </p>
-        <p>
-          Without limiting the foregoing, neither the Company nor any of the company's provider makes any representation or warranty of any kind, express or implied: (i) as to the operation or availability of the Service, or the information, content, and materials or products included thereon; (ii) that the Service will be uninterrupted or error-free; (iii) as to the accuracy, reliability, or currency of any information or content provided through the Service; or (iv) that the Service, its servers, the content, or e-mails sent from or on behalf of the Company are free of viruses, scripts, trojan horses, worms, malware, timebombs or other harmful components.
-        </p>
-        <h2>Governing Law</h2>
-        <p>
-          The laws of the Country, excluding its conflicts of law rules, shall govern this Terms and Your use of the Service. Your use of the Application may also be subject to other local, state, national, or international laws.
-        </p>
-        <h2>Disputes Resolution</h2>
-        <p>
-          If You have any concern or dispute about the Service, You agree to first try to resolve the dispute informally by contacting the Company.
-        </p>
-        <h2>For European Union (EU) Users</h2>
-        <p>
-          If You are a European Union consumer, you will benefit from any mandatory provisions of the law of the country in which you are resident from.
-        </p>
-        <h2>United States Legal Compliance</h2>
-        <p>
-          You represent and warrant that (i) You are not located in a country that is subject to the United States government embargo, or that has been designated by the United States government as a "terrorist supporting" country, and (ii) You are not listed on any United States government list of prohibited or restricted parties.
-        </p>
-        <h2>Severability and Waiver</h2>
-        <h3>Severability</h3>
-        <p>
-          If any provision of these Terms is held to be unenforceable or invalid, such provision will be changed and interpreted to accomplish the objectives of such provision to the greatest extent possible under applicable law and the remaining provisions will continue in full force and effect.
-        </p>
-        <h3>Waiver</h3>
-        <p>
-          Except as provided herein, the failure to exercise a right or to require performance of an obligation under these Terms shall not effect a party's ability to exercise such right or require such performance at any time thereafter nor shall the waiver of a breach constitute a waiver of any subsequent breach.
-        </p>
-        <h2>Translation Disclaimer</h2>
-        <p>
-          The Company may have translated these Terms and Conditions. You agree that the original English text shall prevail in the case of a dispute.
-        </p>
-        <h2>Changes to These Terms and Conditions</h2>
-        <p>
-          We reserve the right, at Our sole discretion, to modify or replace these Terms at any time. If a revision is material We will make reasonable efforts to provide at least 30 days' notice prior to any new terms taking effect. What constitutes a material change will be determined at Our sole discretion.
-        </p>
-        <p>
-          By continuing to access or use Our Service after those revisions become effective, You agree to be bound by the revised terms. If You do not agree to the new terms, in whole or in part, please stop using the Website and the Service.
-        </p>
-        <h2>Contact Us</h2>
-        <p>
-          If you have any questions about these Terms and Conditions, You can contact us:
-        </p>
-        <ul>
-          <li>By email: terms@popcornpicks.com</li>
-        </ul>
+      <div className="container mx-auto px-4 py-16 sm:px-6 lg:px-8">
+        {/* Key Points Summary */}
+        <div className="max-w-6xl mx-auto mb-16">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              Terms at a Glance
+            </span>
+          </h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {keyPoints.map((point, index) => (
+              <Card key={index} className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/15 transition-all duration-300 hover:scale-[1.05] text-center">
+                <CardContent className="p-6">
+                  <div className="text-4xl mb-3">{point.icon}</div>
+                  <h3 className="text-lg font-semibold text-white mb-2">{point.title}</h3>
+                  <p className="text-gray-300 text-sm">{point.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Detailed Sections */}
+        <div className="max-w-4xl mx-auto space-y-8">
+          {sections.map((section) => {
+            const IconComponent = section.icon;
+            return (
+              <Card key={section.id} className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/15 transition-all duration-300">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-2xl font-bold text-white">
+                    <IconComponent className="mr-3 h-6 w-6 text-purple-400" />
+                    {section.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {section.content.map((item, index) => (
+                      <li key={index} className="flex items-start text-gray-300">
+                        <span className="h-2 w-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Important Legal Information */}
+        <div className="max-w-4xl mx-auto mt-16 space-y-8">
+          <Card className="bg-gradient-to-r from-yellow-900/50 to-orange-900/50 border-yellow-500/30">
+            <CardHeader>
+              <CardTitle className="flex items-center text-xl font-bold text-white">
+                <AlertCircle className="mr-3 h-5 w-5 text-yellow-400" />
+                Important Legal Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <h4 className="font-semibold text-yellow-300 mb-2">Governing Law</h4>
+                <p className="text-gray-300">These terms are governed by the laws of California, United States, excluding conflict of law rules.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-yellow-300 mb-2">Dispute Resolution</h4>
+                <p className="text-gray-300">Any disputes will be resolved through binding arbitration in California, United States.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-yellow-300 mb-2">Severability</h4>
+                <p className="text-gray-300">If any provision is deemed invalid, the remaining terms continue in full force and effect.</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Updates and Contact */}
+          <div className="grid md:grid-cols-2 gap-8">
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardHeader>
+                <CardTitle className="flex items-center text-xl font-bold text-white">
+                  <FileText className="mr-3 h-5 w-5 text-purple-400" />
+                  Terms Updates
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-300 mb-4">
+                  We may update these terms periodically. Material changes will be communicated via email and posted on this page at least 30 days in advance.
+                </p>
+                <p className="text-sm text-gray-400">
+                  Last updated: August 26, 2024
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 border-white/20">
+              <CardHeader>
+                <CardTitle className="flex items-center text-xl font-bold text-white">
+                  <Scale className="mr-3 h-5 w-5 text-purple-400" />
+                  Legal Questions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-300 mb-4">
+                  Have questions about these terms? Our legal team is here to help clarify any concerns.
+                </p>
+                <div className="space-y-2 text-sm">
+                  <p className="text-purple-300">Email: legal@popcornpicks.com</p>
+                  <p className="text-purple-300">Terms: terms@popcornpicks.com</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
+
+      <Footer />
     </div>
   );
 };
