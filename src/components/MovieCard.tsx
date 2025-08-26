@@ -4,14 +4,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { getImageUrl } from "@/lib/tmdb";
 
-interface Movie {
+// Updated interface to match TMDB API structure
+export interface Movie {
   id: number;
   title: string;
-  poster: string;
-  rating: number;
-  year: number;
-  genre: string;
+  poster_path: string | null;
+  vote_average: number;
+  release_date: string;
+  genre_ids?: number[];
+  genreName?: string; // For processed genre name
 }
 
 interface MovieCardProps {
@@ -24,9 +27,13 @@ const MovieCard = ({ movie, showAddToWatchlist = true }: MovieCardProps) => {
     <Card className="group overflow-hidden bg-slate-800/50 border-slate-700 hover:border-purple-500/50 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/20">
       <div className="relative aspect-[2/3] overflow-hidden">
         <img
-          src={movie.poster}
+          src={getImageUrl(movie.poster_path, 'w500')}
           alt={movie.title}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = 'https://via.placeholder.com/500x750/1f2937/9ca3af?text=No+Image';
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         
@@ -51,15 +58,17 @@ const MovieCard = ({ movie, showAddToWatchlist = true }: MovieCardProps) => {
         <div className="absolute top-3 right-3">
           <Badge className="bg-black/70 backdrop-blur-md text-white border-white/20 transition-all duration-300 group-hover:scale-110">
             <Star className="h-3 w-3 mr-1 fill-yellow-400 text-yellow-400" />
-            {movie.rating}
+            {movie.vote_average.toFixed(1)}
           </Badge>
         </div>
 
         {/* Genre Pill */}
         <div className="absolute top-3 left-3">
-          <Badge variant="secondary" className="bg-purple-600/80 backdrop-blur-md text-white border-0 transition-all duration-300 group-hover:scale-110">
-            {movie.genre}
-          </Badge>
+          {movie.genreName && (
+            <Badge variant="secondary" className="bg-purple-600/80 backdrop-blur-md text-white border-0 transition-all duration-300 group-hover:scale-110">
+              {movie.genreName}
+            </Badge>
+          )}
         </div>
       </div>
       
@@ -70,7 +79,9 @@ const MovieCard = ({ movie, showAddToWatchlist = true }: MovieCardProps) => {
           </h3>
         </Link>
         <div className="flex items-center justify-between mt-2">
-          <span className="text-sm text-gray-400">{movie.year}</span>
+          <span className="text-sm text-gray-400">
+            {movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A'}
+          </span>
         </div>
       </CardContent>
     </Card>

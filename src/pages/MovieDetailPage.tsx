@@ -1,36 +1,88 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Star, Plus, Play, Bookmark } from "lucide-react";
+import { ArrowLeft, Star, Plus, Play, Bookmark, Clock, Calendar, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import Navigation from "@/components/Navigation";
-
-const movieData = {
-  1: {
-    title: "Dune: Part Two",
-    poster: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=600&fit=crop",
-    backdrop: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&h=600&fit=crop",
-    rating: 8.5,
-    year: 2024,
-    runtime: "166 min",
-    genre: ["Sci-Fi", "Adventure", "Drama"],
-    director: "Denis Villeneuve",
-    plot: "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the known universe, he endeavors to prevent a terrible future only he can foresee.",
-    cast: ["Timothée Chalamet", "Zendaya", "Rebecca Ferguson", "Josh Brolin", "Austin Butler", "Florence Pugh"],
-    trailer: "dQw4w9WgXcQ" // YouTube video ID
-  }
-};
+import { 
+  fetchMovieDetails, 
+  fetchMovieCredits, 
+  fetchMovieVideos, 
+  getImageUrl, 
+  formatRuntime, 
+  formatCurrency,
+  TMDBMovieDetails,
+  TMDBCredits,
+  TMDBVideos 
+} from "@/lib/tmdb";
 
 const MovieDetailPage = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
+  const [movie, setMovie] = useState<TMDBMovieDetails | null>(null);
+  const [credits, setCredits] = useState<TMDBCredits | null>(null);
+  const [videos, setVideos] = useState<TMDBVideos | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [showTrailer, setShowTrailer] = useState(false);
 
-  const movie = movieData[parseInt(id || "1") as keyof typeof movieData] || movieData[1];
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!id) return;
+      
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const movieId = parseInt(id);
+        if (isNaN(movieId)) {
+          throw new Error('Invalid movie ID');
+        }
+        
+        // Fetch movie details, credits, and videos concurrently
+        const [movieData, creditsData, videosData] = await Promise.all([
+          fetchMovieDetails(movieId),
+          fetchMovieCredits(movieId),
+          fetchMovieVideos(movieId)
+        ]);
+        
+        if (!movieData) {
+          throw new Error('Movie not found');
+        }
+        
+        setMovie(movieData);
+        setCredits(creditsData);
+        setVideos(videosData);
+      } catch (err) {
+        console.error('Error fetching movie data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load movie data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [id]);
+
+  // Get the main trailer video
+  const getTrailerKey = () => {
+    if (!videos?.results) return null;
+    const trailer = videos.results.find(
+      video => video.type === 'Trailer' && video.site === 'YouTube'
+    );
+    return trailer?.key || videos.results[0]?.key || null;
+  };
+
+  // Get director from crew
+  const getDirector = () => {
+    if (!credits?.crew) return 'Unknown';
+    const director = credits.crew.find(person => person.job === 'Director');
+    return director?.name || 'Unknown';
+  };
 
   const toggleWatchlist = () => {
     setIsInWatchlist(!isInWatchlist);
@@ -40,6 +92,40 @@ const MovieDetailPage = () => {
     setUserRating(rating);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <Navigation />
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-500 mx-auto mb-4"></div>
+            <p className="text-white text-lg">Loading movie details...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !movie) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <Navigation />
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-white mb-4">Movie Not Found</h1>
+            <p className="text-gray-300 mb-8">{error || 'The requested movie could not be found.'}</p>
+            <Link to="/">
+              <Button className="bg-gradient-to-r from-purple-600 to-pink-600">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Home
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       <Navigation />
@@ -48,7 +134,7 @@ const MovieDetailPage = () => {
       <div className="relative h-screen">
         <div 
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${movie.backdrop})` }}
+          style={{ backgroundImage: `url(${getImageUrl(movie.backdrop_path, 'original')})` }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-slate-900/30" />
         </div>
@@ -59,9 +145,13 @@ const MovieDetailPage = () => {
               {/* Movie Poster */}
               <div className="lg:col-span-1">
                 <img
-                  src={movie.poster}
+                  src={getImageUrl(movie.poster_path, 'w500')}
                   alt={movie.title}
                   className="w-full max-w-sm mx-auto lg:mx-0 rounded-lg shadow-2xl"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = 'https://via.placeholder.com/500x750/1f2937/9ca3af?text=No+Image';
+                  }}
                 />
               </div>
               
@@ -82,34 +172,48 @@ const MovieDetailPage = () => {
                 <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mb-6">
                   <div className="flex items-center gap-1">
                     <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                    <span className="text-white font-semibold">{movie.rating}</span>
+                    <span className="text-white font-semibold">{movie.vote_average.toFixed(1)}</span>
                   </div>
-                  <span className="text-gray-300">{movie.year}</span>
-                  <span className="text-gray-300">{movie.runtime}</span>
-                  <span className="text-gray-300">{movie.director}</span>
+                  <span className="text-gray-300">
+                    {movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A'}
+                  </span>
+                  {movie.runtime && (
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      <span className="text-gray-300">{formatRuntime(movie.runtime)}</span>
+                    </div>
+                  )}
+                  <span className="text-gray-300">{getDirector()}</span>
                 </div>
                 
                 <div className="flex flex-wrap justify-center lg:justify-start gap-2 mb-6">
-                  {movie.genre.map((g) => (
-                    <Badge key={g} variant="secondary" className="bg-white/20 text-white">
-                      {g}
+                  {movie.genres.map((genre) => (
+                    <Badge key={genre.id} variant="secondary" className="bg-white/20 text-white">
+                      {genre.name}
                     </Badge>
                   ))}
                 </div>
                 
                 <p className="text-lg text-gray-300 mb-8 max-w-3xl mx-auto lg:mx-0">
-                  {movie.plot}
+                  {movie.overview || 'No description available.'}
                 </p>
+                
+                {movie.tagline && (
+                  <p className="text-xl text-purple-300 italic mb-6 max-w-3xl mx-auto lg:mx-0">
+                    "{movie.tagline}"
+                  </p>
+                )}
                 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap justify-center lg:justify-start gap-4">
                   <Button
                     size="lg"
                     onClick={() => setShowTrailer(true)}
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                    disabled={!getTrailerKey()}
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50"
                   >
                     <Play className="h-5 w-5 mr-2" />
-                    Watch Trailer
+                    {getTrailerKey() ? 'Watch Trailer' : 'No Trailer Available'}
                   </Button>
                   
                   <Button
@@ -141,17 +245,63 @@ const MovieDetailPage = () => {
               <Card className="bg-slate-800/50 border-slate-700">
                 <CardContent className="p-6">
                   <h3 className="text-xl font-semibold text-white mb-4">Cast</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {movie.cast.map((actor, index) => (
-                      <div key={index} className="text-center">
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 mx-auto mb-2 flex items-center justify-center">
-                          <span className="text-white font-semibold">
-                            {actor.split(" ").map(n => n[0]).join("")}
-                          </span>
+                  {credits?.cast && credits.cast.length > 0 ? (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {credits.cast.slice(0, 12).map((actor) => (
+                        <div key={actor.id} className="text-center">
+                          {actor.profile_path ? (
+                            <img
+                              src={getImageUrl(actor.profile_path, 'w185')}
+                              alt={actor.name}
+                              className="w-16 h-16 rounded-full mx-auto mb-2 object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                target.nextElementSibling?.classList.remove('hidden');
+                              }}
+                            />
+                          ) : null}
+                          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 mx-auto mb-2 flex items-center justify-center hidden">
+                            <span className="text-white font-semibold text-sm">
+                              {actor.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-white font-medium">{actor.name}</p>
+                          <p className="text-xs text-gray-400">{actor.character}</p>
                         </div>
-                        <p className="text-sm text-gray-300">{actor}</p>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400">Cast information not available.</p>
+                  )}
+                </CardContent>
+              </Card>
+              
+              {/* Additional Movie Info */}
+              <Card className="bg-slate-800/50 border-slate-700 mt-6">
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-semibold text-white mb-4">Movie Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-gray-400 text-sm">Status</p>
+                      <p className="text-white">{movie?.status || 'Unknown'}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-sm">Original Language</p>
+                      <p className="text-white">{movie?.original_language?.toUpperCase() || 'Unknown'}</p>
+                    </div>
+                    {movie?.budget && movie.budget > 0 && (
+                      <div>
+                        <p className="text-gray-400 text-sm">Budget</p>
+                        <p className="text-white">{formatCurrency(movie.budget)}</p>
                       </div>
-                    ))}
+                    )}
+                    {movie?.revenue && movie.revenue > 0 && (
+                      <div>
+                        <p className="text-gray-400 text-sm">Revenue</p>
+                        <p className="text-white">{formatCurrency(movie.revenue)}</p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -202,9 +352,10 @@ const MovieDetailPage = () => {
               ✕ Close
             </button>
             <iframe
-              src={`https://www.youtube.com/embed/${movie.trailer}?autoplay=1`}
+              src={`https://www.youtube.com/embed/${getTrailerKey()}?autoplay=1`}
               className="w-full h-full rounded-lg"
               allowFullScreen
+              title="Movie Trailer"
             />
           </div>
         </div>

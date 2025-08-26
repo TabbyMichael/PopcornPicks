@@ -1,135 +1,257 @@
 import React from 'react';
+import { Shield, Eye, Lock, UserCheck, Database, Gavel } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
 
 const PrivacyPolicyPage: React.FC = () => {
+  const sections = [
+    {
+      id: 'information-collection',
+      title: 'Information We Collect',
+      icon: Database,
+      content: [
+        {
+          subtitle: 'Personal Information',
+          items: [
+            'Email address for account creation and communication',
+            'Name for personalization and profile display',
+            'Movie preferences and ratings for recommendations',
+            'Viewing history to improve our suggestion algorithms'
+          ]
+        },
+        {
+          subtitle: 'Usage Data',
+          items: [
+            'Pages visited and time spent on our platform',
+            'Device information (browser type, operating system)',
+            'IP address for security and analytics purposes',
+            'Interaction patterns with movies and features'
+          ]
+        }
+      ]
+    },
+    {
+      id: 'data-usage',
+      title: 'How We Use Your Data',
+      icon: UserCheck,
+      content: [
+        {
+          subtitle: 'Service Improvement',
+          items: [
+            'Provide personalized movie recommendations',
+            'Enhance platform performance and user experience',
+            'Analyze trends to discover new features',
+            'Maintain and improve our recommendation algorithms'
+          ]
+        },
+        {
+          subtitle: 'Communication',
+          items: [
+            'Send account-related notifications',
+            'Share updates about new movies and features',
+            'Provide customer support when needed',
+            'Respond to your inquiries and feedback'
+          ]
+        }
+      ]
+    },
+    {
+      id: 'data-protection',
+      title: 'Data Protection & Security',
+      icon: Lock,
+      content: [
+        {
+          subtitle: 'Security Measures',
+          items: [
+            'Industry-standard encryption for data transmission',
+            'Secure servers with regular security updates',
+            'Limited access to personal data on need-to-know basis',
+            'Regular security audits and vulnerability assessments'
+          ]
+        },
+        {
+          subtitle: 'Data Retention',
+          items: [
+            'Account data retained while your account is active',
+            'Viewing history kept to improve recommendations',
+            'Marketing preferences honored immediately',
+            'Data deletion available upon account closure'
+          ]
+        }
+      ]
+    },
+    {
+      id: 'user-rights',
+      title: 'Your Rights & Controls',
+      icon: Eye,
+      content: [
+        {
+          subtitle: 'Data Control',
+          items: [
+            'Access your personal data at any time',
+            'Update or correct your information',
+            'Delete your account and associated data',
+            'Download your data in a portable format'
+          ]
+        },
+        {
+          subtitle: 'Privacy Preferences',
+          items: [
+            'Manage email notification settings',
+            'Control data sharing with third parties',
+            'Opt out of non-essential analytics',
+            'Customize recommendation preferences'
+          ]
+        }
+      ]
+    }
+  ];
+
   return (
-    <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto text-center">
-        <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">Privacy Policy</h1>
-        <p className="mt-5 text-xl text-gray-500">Your privacy is important to us. This policy explains how we collect, use, and protect your personal information.</p>
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900">
+      <Navigation />
+      
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-black/50" />
+          <div 
+            className="w-full h-full opacity-20"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+            }}
+          />
+        </div>
+        
+        <div className="relative container mx-auto px-4 py-24 sm:px-6 lg:px-8">
+          <div className="text-center max-w-4xl mx-auto">
+            <div className="flex justify-center mb-6">
+              <div className="p-4 bg-white/10 backdrop-blur-sm rounded-full">
+                <Shield className="h-12 w-12 text-purple-400" />
+              </div>
+            </div>
+            <h1 className="text-5xl md:text-7xl font-bold mb-6">
+              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+                Privacy Policy
+              </span>
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-300 mb-8 leading-relaxed">
+              Your privacy is important to us. Learn how we protect and handle your personal information at PopcornPicks.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Badge className="bg-green-500/20 text-green-300 border-green-500/30 px-4 py-2">
+                GDPR Compliant
+              </Badge>
+              <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 px-4 py-2">
+                CCPA Compliant
+              </Badge>
+              <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 px-4 py-2">
+                SOC 2 Certified
+              </Badge>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-12 max-w-3xl mx-auto bg-white shadow overflow-hidden sm:rounded-lg p-6 prose prose-lg text-gray-500">
-        <p>
-          This Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your information when You use the Service and tells You about Your privacy rights and how the law protects You.
-        </p>
-        <h2>Interpretation and Definitions</h2>
-        <h3>Interpretation</h3>
-        <p>
-          The words of which the initial letter is capitalized have meanings defined under the following conditions. The following definitions shall have the same meaning regardless of whether they appear in singular or in plural.
-        </p>
-        <h3>Definitions</h3>
-        <ul>
-          <li>
-            <strong>Account</strong> means a unique account created for You to access our Service or parts of our Service.
-          </li>
-          <li>
-            <strong>Company</strong> (referred to as either "the Company", "We", "Us" or "Our" in this Agreement) refers to PopcornPicks.
-          </li>
-          <li>
-            <strong>Cookies</strong> are small files that are placed on Your computer, mobile device or any other device by a website, containing the details of Your browsing history on that website among its many uses.
-          </li>
-          <li>
-            <strong>Country</strong> refers to: California, United States
-          </li>
-          <li>
-            <strong>Device</strong> means any device that can access the Service such as a computer, a cellphone or a digital tablet.
-          </li>
-          <li>
-            <strong>Personal Data</strong> is any information that relates to an identified or identifiable individual.
-          </li>
-          <li>
-            <strong>Service</strong> refers to the Website.
-          </li>
-          <li>
-            <strong>Service Provider</strong> means any natural or legal person who processes the data on behalf of the Company. It refers to third-party companies or individuals employed by the Company to facilitate the Service, to provide the Service on behalf of the Company, to perform services related to the Service or to assist the Company in analyzing how the Service is used.
-          </li>
-          <li>
-            <strong>Usage Data</strong> refers to data collected automatically, either generated by the use of the Service or from the Service infrastructure itself (for example, the duration of a page visit).
-          </li>
-          <li>
-            <strong>Website</strong> refers to PopcornPicks, accessible from <a href="https://www.popcornpicks.com" rel="external nofollow noopener" target="_blank">https://www.popcornpicks.com</a>
-          </li>
-          <li>
-            <strong>You</strong> means the individual accessing or using the Service, or the company, or other legal entity on behalf of which such individual is accessing or using the Service, as applicable.
-          </li>
-        </ul>
-        <h2>Collecting and Using Your Personal Data</h2>
-        <h3>Types of Data Collected</h3>
-        <h4>Personal Data</h4>
-        <p>
-          While using Our Service, We may ask You to provide Us with certain personally identifiable information that can be used to contact or identify You. Personally identifiable information may include, but is not limited to:
-        </p>
-        <ul>
-          <li>Email address</li>
-          <li>First name and last name</li>
-          <li>Usage Data</li>
-        </ul>
-        <h4>Usage Data</h4>
-        <p>
-          Usage Data is collected automatically when using the Service.
-        </p>
-        <p>
-          Usage Data may include information such as Your Device's Internet Protocol address (e.g. IP address), browser type, browser version, the pages of our Service that You visit, the time and date of Your visit, the time spent on those pages, unique device identifiers and other diagnostic data.
-        </p>
-        <p>
-          When You access the Service by or through a mobile device, We may collect certain information automatically, including, but not limited to, the type of mobile device You use, Your mobile device unique ID, the IP address of Your mobile device, Your mobile operating system, the type of mobile Internet browser You use, unique device identifiers and other diagnostic data.
-        </p>
-        <p>
-          We may also collect information that Your browser sends whenever You visit our Service or when You access the Service by or through a mobile device.
-        </p>
-        <h4>Tracking Technologies and Cookies</h4>
-        <p>
-          We use Cookies and similar tracking technologies to track the activity on Our Service and store certain information. Tracking technologies used are beacons, tags, and scripts to collect and track information and to improve and analyze Our Service. The technologies We use may include:
-        </p>
-        <ul>
-          <li>
-            <strong>Cookies or Browser Cookies.</strong> A cookie is a small file placed on Your Device. You can instruct Your browser to refuse all Cookies or to indicate when a Cookie is being sent. However, if You do not accept Cookies, You may not be able to use some parts of our Service. Unless you have adjusted Your browser setting so that it will refuse Cookies, our Service may use Cookies.
-          </li>
-          <li>
-            <strong>Web Beacons.</strong> Certain sections of our Service and our emails may contain small electronic files known as web beacons (also referred to as clear gifs, pixel tags, and single-pixel gifs) that permit the Company, for example, to count users who have visited those pages or opened an email and for other related website statistics (for example, recording the popularity of a certain section and verifying system and server integrity).
-          </li>
-        </ul>
-        <p>
-          Cookies can be "Persistent" or "Session" Cookies. Persistent Cookies remain on Your personal computer or mobile device when You go offline, while Session Cookies are deleted as soon as You close Your web browser. Learn more about cookies on the <a href="https://www.freeprivacypolicy.com/blog/cookies/" target="_blank">Free Privacy Policy website</a> article.
-        </p>
-        <p>
-          We use both Session and Persistent Cookies for the purposes set out below:
-        </p>
-        <ul>
-          <li>
-            <strong>Necessary / Essential Cookies</strong>
-            <p>Type: Session Cookies</p>
-            <p>Administered by: Us</p>
-            <p>Purpose: These Cookies are essential to provide You with services available through the Website and to enable You to use some of its features. They help to authenticate users and prevent fraudulent use of user accounts. Without these Cookies, the services that You have asked for cannot be provided, and We only use these Cookies to provide You with those services.</p>
-          </li>
-          <li>
-            <strong>Cookies Policy / Notice Acceptance Cookies</strong>
-            <p>Type: Persistent Cookies</p>
-            <p>Administered by: Us</p>
-            <p>Purpose: These Cookies identify if users have accepted the use of cookies on the Website.</p>
-          </li>
-          <li>
-            <strong>Functionality Cookies</strong>
-            <p>Type: Persistent Cookies</p>
-            <p>Administered by: Us</p>
-            <p>Purpose: These Cookies allow us to remember choices You make when You use the Website, such as remembering your login details or language preference. The purpose of these Cookies is to provide You with a more personal experience and to avoid You having to re-enter your preferences every time You use the Website.</p>
-          </li>
-        </ul>
-        <h2>Changes to this Privacy Policy</h2>
-        <p>
-          We may update Our Privacy Policy from time to time. We will notify You of any changes by posting the new Privacy Policy on this page.
-        </p>
-        <p>
-          You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are effective when they are posted on this page.
-        </p>
-        <h2>Contact Us</h2>
-        <p>
-          If you have any questions about this Privacy Policy, You can contact us:
-        </p>
-        <ul>
-          <li>By email: privacy@popcornpicks.com</li>
-        </ul>
+      <div className="container mx-auto px-4 py-16 sm:px-6 lg:px-8">
+        {/* Quick Summary */}
+        <Card className="max-w-4xl mx-auto mb-12 bg-gradient-to-r from-purple-900/50 to-pink-900/50 border-white/20 backdrop-blur-sm">
+          <CardContent className="p-8">
+            <h2 className="text-2xl font-bold text-white mb-4 text-center">Privacy at a Glance</h2>
+            <div className="grid md:grid-cols-3 gap-6 text-center">
+              <div>
+                <Shield className="h-8 w-8 text-green-400 mx-auto mb-2" />
+                <h3 className="font-semibold text-white mb-1">Data Protection</h3>
+                <p className="text-gray-300 text-sm">Your data is encrypted and securely stored</p>
+              </div>
+              <div>
+                <Eye className="h-8 w-8 text-blue-400 mx-auto mb-2" />
+                <h3 className="font-semibold text-white mb-1">Full Transparency</h3>
+                <p className="text-gray-300 text-sm">Clear information about data collection</p>
+              </div>
+              <div>
+                <UserCheck className="h-8 w-8 text-purple-400 mx-auto mb-2" />
+                <h3 className="font-semibold text-white mb-1">Your Control</h3>
+                <p className="text-gray-300 text-sm">Manage your data and privacy settings</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Main Sections */}
+        <div className="max-w-4xl mx-auto space-y-8">
+          {sections.map((section) => {
+            const IconComponent = section.icon;
+            return (
+              <Card key={section.id} className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/15 transition-all duration-300">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-2xl font-bold text-white">
+                    <IconComponent className="mr-3 h-6 w-6 text-purple-400" />
+                    {section.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {section.content.map((subsection, index) => (
+                    <div key={index}>
+                      <h4 className="text-lg font-semibold text-purple-300 mb-3">{subsection.subtitle}</h4>
+                      <ul className="space-y-2">
+                        {subsection.items.map((item, itemIndex) => (
+                          <li key={itemIndex} className="flex items-start text-gray-300">
+                            <span className="h-2 w-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Updates and Contact */}
+        <div className="max-w-4xl mx-auto mt-12 grid md:grid-cols-2 gap-8">
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <CardHeader>
+              <CardTitle className="flex items-center text-xl font-bold text-white">
+                <Gavel className="mr-3 h-5 w-5 text-purple-400" />
+                Policy Updates
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-300 mb-4">
+                We may update this Privacy Policy periodically. When we do, we'll notify you via email and post the updated policy on this page.
+              </p>
+              <p className="text-sm text-gray-400">
+                Last updated: August 26, 2024
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 border-white/20">
+            <CardHeader>
+              <CardTitle className="flex items-center text-xl font-bold text-white">
+                <Shield className="mr-3 h-5 w-5 text-purple-400" />
+                Contact Us
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-300 mb-4">
+                Have questions about our privacy practices? We're here to help.
+              </p>
+              <div className="space-y-2 text-sm">
+                <p className="text-purple-300">Email: privacy@popcornpicks.com</p>
+                <p className="text-purple-300">Data Protection Officer: dpo@popcornpicks.com</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
+
+      <Footer />
     </div>
   );
 };
