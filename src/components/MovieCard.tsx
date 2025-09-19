@@ -23,11 +23,15 @@ interface MovieCardProps {
 }
 
 const MovieCard = ({ movie, showAddToWatchlist = true }: MovieCardProps) => {
+  // Safety check to ensure movie is defined
+  if (!movie) {
+    return null;
+  }
   return (
     <Card className="group overflow-hidden bg-slate-800/50 border-slate-700 hover:border-purple-500/50 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/20">
       <div className="relative aspect-[2/3] overflow-hidden">
         <img
-          src={getImageUrl(movie.poster_path, 'w500')}
+          src={movie.poster_path ? getImageUrl(movie.poster_path, 'w500') : 'https://via.placeholder.com/500x750/1f2937/9ca3af?text=No+Image'}
           alt={movie.title}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
           onError={(e) => {

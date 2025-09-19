@@ -34,12 +34,12 @@ const BrowsePage = () => {
 
   // Helper function to convert TMDB movie to our Movie interface
   const convertTMDBMovie = (movie: TMDBMovie): Movie => ({
-    id: movie.id,
-    title: movie.title,
-    poster_path: movie.poster_path,
-    vote_average: movie.vote_average,
-    release_date: movie.release_date,
-    genre_ids: movie.genre_ids,
+    id: movie.id || 0,
+    title: movie.title || 'Unknown Title',
+    poster_path: movie.poster_path || null,
+    vote_average: movie.vote_average || 0,
+    release_date: movie.release_date || '',
+    genre_ids: movie.genre_ids || [],
     genreName: getGenreName(movie.genre_ids, genres)
   });
 
@@ -383,7 +383,7 @@ const BrowsePage = () => {
             ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" 
             : "space-y-4"
           }>
-            {filteredMovies.map((movie, index) => (
+            {filteredMovies.filter(movie => movie && movie.id).map((movie, index) => (
               <div
                 key={movie.id}
                 className="transition-all duration-500 hover:scale-105"
@@ -397,9 +397,13 @@ const BrowsePage = () => {
                     <div className="flex">
                       <div className="relative w-24 h-36 flex-shrink-0">
                         <img
-                          src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                          src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : 'https://via.placeholder.com/500x750/1f2937/9ca3af?text=No+Image'}
                           alt={movie.title}
                           className="h-full w-full object-cover rounded-l"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = 'https://via.placeholder.com/500x750/1f2937/9ca3af?text=No+Image';
+                          }}
                         />
                       </div>
                       <div className="flex-1 p-4 flex flex-col justify-between">

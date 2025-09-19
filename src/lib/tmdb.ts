@@ -85,7 +85,13 @@ const checkApiKey = () => {
 export async function fetchTrendingMovies(): Promise<TMDBMovie[]> {
   try {
     checkApiKey();
-    const response = await fetch(`${TMDB_BASE_URL}/trending/movie/week?api_key=${TMDB_API_KEY}`);
+    const response = await fetch(`${TMDB_BASE_URL}/trending/movie/week?api_key=${TMDB_API_KEY}`, {
+      method: 'GET',
+      credentials: 'omit',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -107,15 +113,27 @@ export async function searchMovies(query: string): Promise<TMDBMovie[]> {
       return [];
     }
     
-    const response = await fetch(
-      `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&include_adult=false`
-    );
+    console.log('TMDB API Key:', TMDB_API_KEY ? 'Present' : 'Missing');
+    console.log('Search query:', query);
+    
+    const url = `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&include_adult=false`;
+    console.log('Search URL:', url);
+    
+    // Using a different approach for fetch to handle potential CORS issues
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'omit',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
     const data = await response.json();
+    console.log('Search results count:', data.results ? data.results.length : 0);
     return data.results || [];
   } catch (error) {
     console.error("Error searching movies:", error);
@@ -128,7 +146,14 @@ export async function fetchMovieDetails(movieId: number): Promise<TMDBMovieDetai
   try {
     checkApiKey();
     const response = await fetch(
-      `${TMDB_BASE_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos`
+      `${TMDB_BASE_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos`,
+      {
+        method: 'GET',
+        credentials: 'omit',
+        headers: {
+          'Accept': 'application/json'
+        }
+      }
     );
     
     if (!response.ok) {
@@ -150,7 +175,13 @@ export async function fetchMovieDetails(movieId: number): Promise<TMDBMovieDetai
 export async function fetchMovieCredits(movieId: number): Promise<TMDBCredits | null> {
   try {
     checkApiKey();
-    const response = await fetch(`${TMDB_BASE_URL}/movie/${movieId}/credits?api_key=${TMDB_API_KEY}`);
+    const response = await fetch(`${TMDB_BASE_URL}/movie/${movieId}/credits?api_key=${TMDB_API_KEY}`, {
+      method: 'GET',
+      credentials: 'omit',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -168,7 +199,13 @@ export async function fetchMovieCredits(movieId: number): Promise<TMDBCredits | 
 export async function fetchMovieVideos(movieId: number): Promise<TMDBVideos | null> {
   try {
     checkApiKey();
-    const response = await fetch(`${TMDB_BASE_URL}/movie/${movieId}/videos?api_key=${TMDB_API_KEY}`);
+    const response = await fetch(`${TMDB_BASE_URL}/movie/${movieId}/videos?api_key=${TMDB_API_KEY}`, {
+      method: 'GET',
+      credentials: 'omit',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -182,11 +219,17 @@ export async function fetchMovieVideos(movieId: number): Promise<TMDBVideos | nu
   }
 }
 
-// Fetch all movie genres
+// Fetch movie genres
 export async function fetchMovieGenres(): Promise<TMDBGenre[]> {
   try {
     checkApiKey();
-    const response = await fetch(`${TMDB_BASE_URL}/genre/movie/list?api_key=${TMDB_API_KEY}`);
+    const response = await fetch(`${TMDB_BASE_URL}/genre/movie/list?api_key=${TMDB_API_KEY}`, {
+      method: 'GET',
+      credentials: 'omit',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -204,7 +247,13 @@ export async function fetchMovieGenres(): Promise<TMDBGenre[]> {
 export async function fetchPopularMovies(): Promise<TMDBMovie[]> {
   try {
     checkApiKey();
-    const response = await fetch(`${TMDB_BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}`);
+    const response = await fetch(`${TMDB_BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}`, {
+      method: 'GET',
+      credentials: 'omit',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -222,7 +271,13 @@ export async function fetchPopularMovies(): Promise<TMDBMovie[]> {
 export async function fetchTopRatedMovies(): Promise<TMDBMovie[]> {
   try {
     checkApiKey();
-    const response = await fetch(`${TMDB_BASE_URL}/movie/top_rated?api_key=${TMDB_API_KEY}`);
+    const response = await fetch(`${TMDB_BASE_URL}/movie/top_rated?api_key=${TMDB_API_KEY}`, {
+      method: 'GET',
+      credentials: 'omit',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -240,7 +295,13 @@ export async function fetchTopRatedMovies(): Promise<TMDBMovie[]> {
 export async function fetchUpcomingMovies(): Promise<TMDBMovie[]> {
   try {
     checkApiKey();
-    const response = await fetch(`${TMDB_BASE_URL}/movie/upcoming?api_key=${TMDB_API_KEY}`);
+    const response = await fetch(`${TMDB_BASE_URL}/movie/upcoming?api_key=${TMDB_API_KEY}`, {
+      method: 'GET',
+      credentials: 'omit',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
