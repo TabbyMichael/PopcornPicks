@@ -37,18 +37,39 @@ const SearchPage = () => {
     getGenres();
   }, []);
 
+  // Initialize search from URL params
+  useEffect(() => {
+    const queryParam = searchParams.get("q");
+    if (queryParam) {
+      setSearchQuery(queryParam);
+      // Trigger search immediately when URL has a query parameter
+      console.log('Initializing search from URL parameter:', queryParam);
+      // Force a search when URL parameter is present
+      handleSearch();
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     const fetchAndFilterMovies = async () => {
       setLoading(true);
       let movies = [];
       if (searchQuery) {
+        console.log('Searching for:', searchQuery);
         movies = await searchMovies(searchQuery);
+        console.log('Search results:', movies);
+        console.log('Search results count:', movies.length);
+        if (movies.length === 0) {
+          console.log('No movies found in search results');
+        }
       }
 
       let filtered = movies.map(movie => ({
         id: movie.id,
         title: movie.title,
-        poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : "",
+        poster_path: movie.poster_path,
+        vote_average: movie.vote_average,
+        release_date: movie.release_date,
+        genre_ids: movie.genre_ids,
         rating: movie.vote_average ? parseFloat(movie.vote_average.toFixed(1)) : 0,
         year: movie.release_date ? new Date(movie.release_date).getFullYear() : 0,
         genre: movie.genre_ids && movie.genre_ids.length > 0 ? movie.genre_ids.map((id: number) => genreMap.get(id)).filter(Boolean).join(", ") : "N/A",
@@ -78,6 +99,7 @@ const SearchPage = () => {
   }, [searchQuery, selectedGenre, ratingRange, yearRange, genreMap]);
 
   const handleSearch = () => {
+    console.log('Handling search for:', searchQuery);
     setSearchParams(searchQuery ? { q: searchQuery } : {});
   };
 
@@ -170,13 +192,34 @@ const SearchPage = () => {
           {/* Movie Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {loading ? (
-              <div className="col-span-full text-center text-white">Loading...</div>
+              // Loading skeleton
+              Array.from({ length: 8 }).map((_, index) => (
+                <div key={index} className="bg-slate-800/50 rounded-lg h-96 animate-pulse"></div>
+              ))
             ) : filteredMovies.length > 0 ? (
               filteredMovies.map((movie) => (
-                <MovieCard key={movie.id} movie={movie} />
+                <MovieCard 
+                  key={movie.id} 
+                  movie={{
+                    id: movie.id,
+                    title: movie.title,
+                    poster_path: movie.poster_path,
+                    vote_average: movie.vote_average || 0,
+                    release_date: movie.release_date || '',
+                    genre_ids: movie.genre_ids
+                  }} 
+                />
               ))
             ) : (
-              <div className="col-span-full text-center text-white">No movies found.</div>
+              <div className="col-span-full text-center py-12">
+                <p className="text-gray-400 text-lg mb-4">No movies found.</p>
+                {searchQuery && (
+                  <p className="text-gray-500">Try searching for a different movie or check your spelling.</p>
+                )}
+                {!searchQuery && (
+                  <p className="text-gray-500">Enter a movie title in the search box above to find movies.</p>
+                )}
+              </div>
             )}
           </div>
         </div>
