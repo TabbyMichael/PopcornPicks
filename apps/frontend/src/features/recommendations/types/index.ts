@@ -6,5 +6,4 @@ export interface RecommendationSection {
   reason: string;
   icon: React.ComponentType<{ className?: string }>;
   movies: Movie[];
-  gradient: string;
 }

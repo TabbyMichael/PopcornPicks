@@ -1,12 +1,13 @@
-import { Link } from "react-router-dom";
-import { Button } from "@/shared/components/ui/button";
 import { useState } from "react";
-import { useWatchlist } from "@/features/watchlist/context/WatchlistContext";
-import { useToast } from "@/shared/components/ui/use-toast";
-import Navigation from "@/shared/components/Navigation";
-import { MovieHero } from "@/features/movies/components/MovieHero";
+import { Link } from "react-router-dom";
+
+import { Button } from "@/shared/components/ui/button";
 import { MovieDetailsGrid } from "@/features/movies/components/MovieDetailsGrid";
+import { MovieHero } from "@/features/movies/components/MovieHero";
 import { useMovieDetails } from "@/features/movies/hooks/useMovieDetails";
+import { useWatchlist } from "@/features/watchlist/context/WatchlistContext";
+import { posterPathFromUrl } from "@/utils/normalized-poster";
+import { useToast } from "@/shared/components/ui/use-toast";
 
 const MovieDetailPage = () => {
   const {
@@ -26,44 +27,38 @@ const MovieDetailPage = () => {
 
   const toggleWatchlist = () => {
     if (!movie) return;
-    const movieForWatchlist = {
+    const payload = {
       id: movie.id,
       title: movie.title,
-      poster_path: movie.poster_path,
-      vote_average: movie.vote_average,
-      release_date: movie.release_date,
-      genre_ids: movie.genres.map((genre) => genre.id),
+      poster_path: posterPathFromUrl(movie.posterUrl),
+      backdrop_path: posterPathFromUrl(movie.backdropUrl),
+      vote_average: movie.voteAverage,
+      release_date: movie.releaseDate,
+      genre_ids: movie.genreIds,
     };
     if (isInWatchlist(movie.id)) {
       removeFromWatchlist(movie.id);
       toast({
         title: "Removed from watchlist",
         description: `${movie.title} has been removed from your watchlist`,
-        variant: "default",
       });
     } else {
-      addToWatchlist(movieForWatchlist);
+      addToWatchlist(payload);
       toast({
         title: "Added to watchlist",
         description: `${movie.title} has been added to your watchlist`,
-        variant: "default",
       });
     }
   };
 
-  const handleRating = (rating: number) => {
-    setUserRating(rating);
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <Navigation />
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-500 mx-auto mb-4"></div>
-            <p className="text-white text-lg">Loading movie details...</p>
-          </div>
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mb-6 h-8 w-64 animate-pulse rounded bg-muted" />
+        <div className="mb-6 aspect-video w-full animate-pulse rounded bg-muted" />
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="h-64 animate-pulse rounded bg-muted lg:col-span-2" />
+          <div className="h-64 animate-pulse rounded bg-muted" />
         </div>
       </div>
     );
@@ -71,28 +66,26 @@ const MovieDetailPage = () => {
 
   if (error || !movie) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <Navigation />
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-white mb-4">Movie Not Found</h1>
-            <p className="text-gray-300 mb-8">{error || 'The requested movie could not be found.'}</p>
-            <Link to="/">
-              <Button className="bg-gradient-to-r from-purple-600 to-pink-600">Back to Home</Button>
-            </Link>
-          </div>
-        </div>
+      <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-bold text-foreground">Movie not found</h1>
+        <p className="mt-4 text-muted-foreground">
+          {error || "The requested movie could not be found."}
+        </p>
+        <Link to="/">
+          <Button variant="primary-red" className="mt-6">
+            Back to home
+          </Button>
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <Navigation />
+    <div>
       <MovieHero
         movie={movie}
         director={getDirector()}
-        isInWatchlist={movie && isInWatchlist(movie.id)}
+        isInWatchlist={isInWatchlist(movie.id)}
         canPlayTrailer={!!getTrailerKey()}
         onToggleWatchlist={toggleWatchlist}
         onPlayTrailer={() => setShowTrailer(true)}
@@ -101,7 +94,7 @@ const MovieDetailPage = () => {
         movie={movie}
         credits={credits}
         userRating={userRating}
-        onRate={handleRating}
+        onRate={setUserRating}
         similarMovies={similarMovies || []}
         recommendations={recommendations || []}
         showTrailer={showTrailer}

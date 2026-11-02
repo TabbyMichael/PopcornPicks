@@ -1,150 +1,111 @@
-import { useState, useEffect } from "react";
-import { Search, TrendingUp, ArrowDown, ChevronRight } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Navigation from "@/shared/components/Navigation";
+
+import { Button } from "@/shared/components/ui/button";
+import { TrailerPlayButton } from "@/shared/components/TrailerPlayButton";
+import { LiquidGlassPanel } from "@/shared/components/liquid-glass/LiquidGlassPanel";
 import MovieCard from "@/features/movies/components/MovieCard";
-import WhyChooseUs from "@/shared/components/WhyChooseUs";
-import TestimonialsCarousel from "@/shared/components/TestimonialsCarousel";
-import NewsletterSignup from "@/shared/components/NewsletterSignup";
-import Footer from "@/shared/components/Footer";
 import { useTrendingMovies } from "@/features/home/hooks/useTrendingMovies";
 
+const DEFAULT_BACKDROP =
+  "https://images.unsplash.com/photo-1470813740244-df37b8c1edcb?w=1920&h=1080&fit=crop";
+
 const HomePage = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isVisible, setIsVisible] = useState(false);
+  const [backdropUrl, setBackdropUrl] = useState<string | null>(null);
   const { trendingMovies, loading, error } = useTrendingMovies();
 
+  // Once trending data arrives, use the first movie's backdrop as hero art.
   useEffect(() => {
-    setIsVisible(true);
-  }, []);
-
-  const scrollToContent = () => {
-    const element = document.getElementById("trending-section");
-    element?.scrollIntoView({ behavior: "smooth" });
-  };
+    const first = trendingMovies[0];
+    if (first?.backdrop_path) {
+      setBackdropUrl(`https://image.tmdb.org/t/p/original${first.backdrop_path}`);
+    }
+  }, [trendingMovies]);
 
   return (
-    <div className="min-h-screen bg-black">
-      <Navigation />
+    <div className="bg-background">
+      {/* Hero */}
+      <section className="relative flex min-h-[70vh] items-end overflow-hidden">
+        <img
+          src={backdropUrl ?? DEFAULT_BACKDROP}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+          onError={(e) => {
+            const target = e.currentTarget;
+            if (target.src !== DEFAULT_BACKDROP) target.src = DEFAULT_BACKDROP;
+          }}
+        />
+        {/* Netflix-style readability scrim: transparent top, near-black bottom. */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-background" />
 
-      {/* Hero Section - Full Screen */}
-      <div className="relative h-screen flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src="https://images.unsplash.com/photo-1470813740244-df37b8c1edcb?w=1920&h=1080&fit=crop"
-            alt="Cinema background"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80" />
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-900/20 to-pink-900/20" />
-        </div>
-
-        <div className={`relative z-10 text-center px-4 max-w-4xl mx-auto transition-all duration-1000 ${
-          isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-        }`}>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
-            Your Next
-            <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-pulse">
-              {" "}Favorite Movie
-            </span>
-            <br />Awaits
+        <div className="relative mx-auto w-full max-w-7xl px-4 pb-16 pt-24 sm:px-6 lg:px-8">
+          <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+            {trendingMovies[0]?.title ?? "Trending now"}
           </h1>
 
-          <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
-            Explore trending blockbusters, discover hidden gems, and get custom picks tailored just for you
-          </p>
-
-          <div className="max-w-2xl mx-auto mb-8">
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full blur opacity-30 group-hover:opacity-50 transition duration-300" />
-              <div className="relative flex gap-2 bg-black/50 backdrop-blur-md rounded-full p-2 border border-white/20">
-                <div className="relative flex-1">
-                  <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                  <Input
-                    type="text"
-                    placeholder="Search by title, genre, or year..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-14 pl-12 bg-transparent border-0 text-white placeholder:text-gray-400 focus:ring-0 focus:outline-none text-lg"
-                  />
-                </div>
-                <Link to={`/search?q=${encodeURIComponent(searchQuery)}`}>
-                  <Button size="lg" className="h-14 px-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-full text-lg font-semibold">
-                    Search
+          <LiquidGlassPanel
+            mode="prominent"
+            borderRadius={20}
+            blurAmount={8}
+            displacementScale={70}
+            aberrationIntensity={10}
+            padding="12px 16px"
+            className="mt-8 max-w-fit"
+          >
+            <div className="flex flex-wrap gap-3">
+              {trendingMovies[0] && (
+                <TrailerPlayButton
+                  movieId={trendingMovies[0].id}
+                  movieTitle={trendingMovies[0].title}
+                  label="Watch trailer"
+                  variant="primary-red"
+                  size="lg"
+                />
+              )}
+              {trendingMovies[0] && (
+                <Link to={`/movies/${trendingMovies[0].id}`}>
+                  <Button variant="glass" size="lg">
+                    More info
                   </Button>
                 </Link>
-              </div>
+              )}
             </div>
-          </div>
+          </LiquidGlassPanel>
+        </div>
+      </section>
 
-          <Button
-            onClick={scrollToContent}
-            size="lg"
-            variant="outline"
-            className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 rounded-full px-8 py-6 text-lg font-semibold group"
+      {/* Trending row */}
+      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mb-6 flex items-baseline justify-between">
+          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">Trending now</h2>
+          <Link
+            to="/browse"
+            className="text-sm font-medium text-foreground/70 hover:text-netflix-red transition-colors"
           >
-            Start Exploring
-            <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-          </Button>
+            See all
+          </Link>
         </div>
 
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <button onClick={scrollToContent} className="text-white/60 hover:text-white transition-colors">
-            <ArrowDown className="h-6 w-6" />
-          </button>
-        </div>
-      </div>
-
-      <div id="trending-section" className="bg-gradient-to-b from-black to-slate-900 py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center gap-3 mb-12 justify-center">
-            <div className="h-1 w-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded" />
-            <TrendingUp className="h-8 w-8 text-purple-400" />
-            <h2 className="text-4xl md:text-5xl font-bold text-white text-center">Trending Now</h2>
-            <div className="h-1 w-12 bg-gradient-to-r from-pink-600 to-purple-600 rounded" />
+        {loading ? (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="aspect-[2/3] w-full rounded bg-muted" />
+            ))}
           </div>
-
-          <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide snap-x snap-mandatory">
-            {loading ? (
-              Array.from({ length: 6 }).map((_, index) => (
-                <div key={index} className="flex-none w-72 snap-center">
-                  <div className="bg-slate-800/50 rounded-lg h-96 animate-pulse" />
-                </div>
-              ))
-            ) : error ? (
-              <div className="w-full text-center py-12">
-                <p className="text-red-400 text-lg mb-4">{error}</p>
-                <p className="text-gray-400">
-                  Make sure you have added your TMDB API key to the .env.local file.
-                </p>
-              </div>
-            ) : trendingMovies.length === 0 ? (
-              <div className="w-full text-center py-12">
-                <p className="text-gray-400 text-lg">No movies found.</p>
-              </div>
-            ) : (
-              trendingMovies.map((movie, index) => (
-                <div
-                  key={movie.id}
-                  className={`flex-none w-72 snap-center transition-all duration-700 ${
-                    isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                  }`}
-                  style={{ transitionDelay: `${index * 100}ms` }}
-                >
-                  <MovieCard movie={movie} />
-                </div>
-              ))
-            )}
+        ) : error ? (
+          <p className="rounded border border-destructive/40 bg-destructive/10 p-4 text-sm text-foreground">
+            Failed to load trending movies. Check your connection and try again.
+          </p>
+        ) : trendingMovies.length === 0 ? (
+          <p className="text-foreground/60">No movies available right now.</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+            {trendingMovies.slice(0, 12).map((movie) => (
+              <MovieCard key={movie.id} movie={movie} />
+            ))}
           </div>
-        </div>
-      </div>
-
-      <WhyChooseUs />
-      <TestimonialsCarousel />
-      <NewsletterSignup />
-      <Footer />
+        )}
+      </section>
     </div>
   );
 };

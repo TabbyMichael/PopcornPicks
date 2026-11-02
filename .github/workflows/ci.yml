@@ -18,3 +18,24 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
+
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/backend
+    env:
+      # Placeholder only: typecheck/build never call TMDB. Real key stays a local/CI secret.
+      TMDB_API_KEY: ci-placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run lint:boundaries
+      - run: npm run build
+      - run: npm test

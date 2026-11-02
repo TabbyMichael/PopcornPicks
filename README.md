@@ -11,7 +11,7 @@ many independent modules that can each be extracted into a microservice later
 .
 |-- apps/
 |   |-- frontend/   React + TypeScript SPA (feature-based)    <- active
-|   |-- backend/    Modular Monolith API (placeholder)        <- hides all external APIs
+|   |-- backend/    Modular Monolith API (Express + TMDB proxy)  <- active
 |   `-- admin/      Admin console (placeholder)
 |-- packages/       shared ui / config / constants / utils / hooks / types / shared
 |-- database/       PostgreSQL-first: schema, migrations, seeds,
@@ -35,7 +35,7 @@ many independent modules that can each be extracted into a microservice later
 ## Prerequisites
 
 - Node.js >= 18 & npm ([install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating))
-- A TMDB API key (see `docs/tmdb-setup.md`)
+- A TMDB API key, used **only by the backend** (see `docs/tmdb-setup.md`)
 
 ## Getting started
 
@@ -61,19 +61,22 @@ docker/scripts/start.sh dev
 # 1. Install dependencies (installs all apps/* and packages/* workspaces)
 npm install
 
-# 2. Start the frontend dev server (http://localhost:8080)
+# 2. Configure + start the backend (http://localhost:4000)
+cp apps/backend/.env.example apps/backend/.env   # then set TMDB_API_KEY
+npm run dev:backend
+
+# 3. Start the frontend dev server (http://localhost:8080)
 npm run dev
 
-# 3. Build the frontend
+# 4. Build the frontend
 npm run build
 
-# 4. Lint
+# 5. Lint
 npm run lint
 ```
 
-> The frontend currently calls TMDB directly. Later the backend will hide every
-> external API - the architecture is already prepared for that (no backend logic
-> is implemented yet).
+> The frontend never talks to TMDB directly - all catalog data is served by the
+> backend proxy at `/api/*` so the TMDB key stays server-side (ADR-0003).
 
 ## Tech stack (frontend)
 

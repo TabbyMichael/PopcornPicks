@@ -1,195 +1,211 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Mail, Lock, UserPlus, ArrowLeft } from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Lock, Mail } from "lucide-react";
+
 import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Input } from "@/shared/components/ui/input";
+import { ApiError } from "@popcornpicks/api-client";
+import { useAuth } from "@/features/authentication/context/AuthContext";
+
+type FormMode = "signin" | "signup" | "forgotpassword";
 
 const AuthPage = () => {
-  const [formType, setFormType] = useState("signin"); // "signin", "signup", "forgotpassword"
+  const { login, register } = useAuth();
+  const navigate = useNavigate();
+  const [mode, setMode] = useState<FormMode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission logic here based on formType
-    console.log(formType, { email, password, confirmPassword });
-    // In a real app, you'd send this to an authentication service
-  };
+    setError(null);
 
-  const renderForm = () => {
-    switch (formType) {
-      case "signin":
-        return (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400"
-                required
-              />
-            </div>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <Input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400"
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
-              Sign In
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 48 48">
-                <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
-                <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
-                <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
-                <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
-              </svg>
-              Sign In with Google
-            </Button>
-            <p className="text-center text-gray-400 text-sm">
-              Don't have an account?{" "}
-              <button type="button" onClick={() => setFormType("signup")}
-                className="text-purple-400 hover:underline focus:outline-none"
-              >
-                Sign Up
-              </button>
-            </p>
-            <p className="text-center text-gray-400 text-sm">
-              <button type="button" onClick={() => setFormType("forgotpassword")}
-                className="text-purple-400 hover:underline focus:outline-none"
-              >
-                Forgot Password?
-              </button>
-            </p>
-          </form>
-        );
-      case "signup":
-        return (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400"
-                required
-              />
-            </div>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <Input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400"
-                required
-              />
-            </div>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <Input
-                type="password"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400"
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
-              Sign Up
-            </Button>
-            <p className="text-center text-gray-400 text-sm">
-              Already have an account?{" "}
-              <button type="button" onClick={() => setFormType("signin")}
-                className="text-purple-400 hover:underline focus:outline-none"
-              >
-                Sign In
-              </button>
-            </p>
-          </form>
-        );
-      case "forgotpassword":
-        return (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <Input
-                type="email"
-                placeholder="Enter your email to reset password"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400"
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
-              Reset Password
-            </Button>
-            <p className="text-center text-gray-400 text-sm">
-              <button type="button" onClick={() => setFormType("signin")}
-                className="text-purple-400 hover:underline focus:outline-none"
-              >
-                Back to Sign In
-              </button>
-            </p>
-          </form>
-        );
-      default:
-        return null;
+    if (mode === "forgotpassword") {
+      setError("Password reset is not available yet.");
+      return;
+    }
+
+    if (mode === "signup" && password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      if (mode === "signin") {
+        await login(email, password);
+      } else {
+        await register(email, password);
+      }
+      navigate("/", { replace: true });
+    } catch (err) {
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : "Something went wrong. Please try again.",
+      );
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const getTitle = () => {
-    switch (formType) {
-      case "signin":
-        return "Sign In";
-      case "signup":
-        return "Sign Up";
-      case "forgotpassword":
-        return "Forgot Password";
-      default:
-        return "";
-    }
-  };
+  const title =
+    mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Reset password";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-slate-800/50 border-slate-700 backdrop-blur-sm">
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold text-white flex items-center justify-center gap-2">
-            {formType !== "signin" && (
-              <button type="button" onClick={() => setFormType("signin")}
-                className="text-gray-400 hover:text-white transition-colors"
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <div className="w-full max-w-md">
+        <Link to="/" className="mb-6 block text-center">
+          <span className="text-2xl font-bold tracking-tight text-netflix-red">PopcornPicks</span>
+        </Link>
+
+        <Card className="border border-white/10 bg-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3 text-2xl text-foreground">
+              {mode !== "signin" && (
+                <button
+                  type="button"
+                  onClick={() => setMode("signin")}
+                  aria-label="Back to sign in"
+                  className="rounded p-1 text-muted-foreground hover:bg-white/10 hover:text-foreground"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </button>
+              )}
+              {title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="relative">
+                <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                  className="h-11 pl-10 bg-background border-border"
+                  required
+                />
+              </div>
+
+              {mode !== "forgotpassword" && (
+                <div className="relative">
+                  <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                    className="h-11 pl-10 bg-background border-border"
+                    required
+                  />
+                </div>
+              )}
+
+              {mode === "signup" && (
+                <div className="relative">
+                  <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    type="password"
+                    placeholder="Confirm password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    autoComplete="new-password"
+                    className="h-11 pl-10 bg-background border-border"
+                    required
+                  />
+                </div>
+              )}
+
+              {error && (
+                <p role="alert" className="text-sm text-netflix-red">
+                  {error}
+                </p>
+              )}
+
+              <Button
+                type="submit"
+                variant="primary-red"
+                className="w-full"
+                disabled={submitting}
               >
-                <ArrowLeft className="h-6 w-6" />
-              </button>
-            )}
-            {getTitle()}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {renderForm()}
-        </CardContent>
-      </Card>
+                {submitting
+                  ? "Please wait…"
+                  : mode === "signin"
+                    ? "Sign in"
+                    : mode === "signup"
+                      ? "Create account"
+                      : "Send reset link"}
+              </Button>
+
+              {mode === "signin" && (
+                <Button type="button" variant="glass" className="w-full gap-2">
+                  <svg viewBox="0 0 48 48" className="h-4 w-4" aria-hidden>
+                    <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z" />
+                    <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
+                    <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z" />
+                    <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C40 35.2 44 30 44 24c0-1.3-.1-2.6-.4-3.9z" />
+                  </svg>
+                  Continue with Google
+                </Button>
+              )}
+
+              <div className="pt-2 text-center text-sm text-muted-foreground">
+                {mode === "signin" && (
+                  <>
+                    <span>
+                      Don't have an account?{" "}
+                      <button
+                        type="button"
+                        onClick={() => setMode("signup")}
+                        className="text-primary hover:underline"
+                      >
+                        Sign up
+                      </button>
+                    </span>
+                    <br />
+                    <button
+                      type="button"
+                      onClick={() => setMode("forgotpassword")}
+                      className="mt-2 text-primary hover:underline"
+                    >
+                      Forgot password?
+                    </button>
+                  </>
+                )}
+                {mode === "signup" && (
+                  <span>
+                    Already have an account?{" "}
+                    <button
+                      type="button"
+                      onClick={() => setMode("signin")}
+                      className="text-primary hover:underline"
+                    >
+                      Sign in
+                    </button>
+                  </span>
+                )}
+                {mode === "forgotpassword" && (
+                  <button
+                    type="button"
+                    onClick={() => setMode("signin")}
+                    className="text-primary hover:underline"
+                  >
+                    Back to sign in
+                  </button>
+                )}
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

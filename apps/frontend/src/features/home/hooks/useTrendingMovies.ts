@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import {
   fetchTrendingMovies,
   fetchMovieGenres,
-  TMDBMovie,
-  TMDBGenre,
   getGenreName,
 } from "@/features/home/services/home.service";
+import type { Genre, Movie as NormalizedMovie } from "@popcornpicks/types";
+import { posterPathFromUrl } from "@/utils/normalized-poster";
 import { Movie } from "@/features/movies/components/MovieCard";
 
 /**
@@ -14,7 +14,7 @@ import { Movie } from "@/features/movies/components/MovieCard";
  */
 export function useTrendingMovies() {
   const [trendingMovies, setTrendingMovies] = useState<Movie[]>([]);
-  const [genres, setGenres] = useState<TMDBGenre[]>([]);
+  const [genres, setGenres] = useState<Genre[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,15 +32,17 @@ export function useTrendingMovies() {
 
         setGenres(genresData);
 
-        // Map TMDB movie data to our Movie interface with genre names
-        const mappedMovies: Movie[] = moviesData.map((movie: TMDBMovie) => ({
+        // Map normalized DTOs to our Movie card interface with genre names
+        const mappedMovies: Movie[] = moviesData.results.map((movie: NormalizedMovie) => ({
           id: movie.id,
           title: movie.title,
-          poster_path: movie.poster_path,
-          vote_average: movie.vote_average,
-          release_date: movie.release_date,
-          genre_ids: movie.genre_ids,
-          genreName: getGenreName(movie.genre_ids, genresData),
+          poster_path: posterPathFromUrl(movie.posterUrl),
+          backdrop_path: posterPathFromUrl(movie.backdropUrl),
+          vote_average: movie.voteAverage,
+          release_date: movie.releaseDate,
+          genre_ids: movie.genreIds,
+          genreName: getGenreName(movie.genreIds, genresData),
+          video: movie.hasTrailer,
         }));
 
         setTrendingMovies(mappedMovies);

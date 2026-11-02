@@ -6,10 +6,10 @@ import {
   fetchPopularMovies,
   fetchTopRatedMovies,
   fetchUpcomingMovies,
-  TMDBMovie,
-  TMDBGenre,
   getGenreName,
 } from "@/features/recommendations/services/recommendation.service";
+import type { Genre, Movie as NormalizedMovie } from "@popcornpicks/types";
+import { posterPathFromUrl } from "@/utils/normalized-poster";
 import { Movie } from "@/features/movies/components/MovieCard";
 import { RecommendationSection } from "@/features/recommendations/types";
 
@@ -21,19 +21,21 @@ export function useRecommendations() {
   const [recommendationSections, setRecommendationSections] = useState<
     RecommendationSection[]
   >([]);
-  const [genres, setGenres] = useState<TMDBGenre[]>([]);
+  const [genres, setGenres] = useState<Genre[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const convertTMDBMovie = (movie: TMDBMovie): Movie => ({
+  const convertMovie = (movie: NormalizedMovie): Movie => ({
     id: movie.id,
     title: movie.title,
-    poster_path: movie.poster_path,
-    vote_average: movie.vote_average,
-    release_date: movie.release_date,
-    genre_ids: movie.genre_ids,
-    genreName: getGenreName(movie.genre_ids, genres),
+    poster_path: posterPathFromUrl(movie.posterUrl),
+    backdrop_path: posterPathFromUrl(movie.backdropUrl),
+    vote_average: movie.voteAverage,
+    release_date: movie.releaseDate,
+    genre_ids: movie.genreIds,
+    genreName: getGenreName(movie.genreIds, genres),
+    video: movie.hasTrailer,
   });
 
   const fetchRecommendations = async () => {
@@ -53,29 +55,25 @@ export function useRecommendations() {
           title: "Trending This Week",
           reason: "What everyone's watching",
           icon: TrendingUp,
-          gradient: "from-orange-500 to-red-500",
-          movies: trending.slice(0, 8).map(convertTMDBMovie),
+          movies: trending.results.slice(0, 8).map(convertMovie),
         },
         {
           title: "Popular Right Now",
           reason: "Crowd favorites",
           icon: Heart,
-          gradient: "from-pink-500 to-rose-500",
-          movies: popular.slice(0, 8).map(convertTMDBMovie),
+          movies: popular.results.slice(0, 8).map(convertMovie),
         },
         {
           title: "Critics' Choice",
           reason: "Highest rated movies",
           icon: Trophy,
-          gradient: "from-yellow-500 to-amber-500",
-          movies: topRated.slice(0, 8).map(convertTMDBMovie),
+          movies: topRated.results.slice(0, 8).map(convertMovie),
         },
         {
           title: "Coming Soon",
           reason: "Upcoming releases",
           icon: Sparkles,
-          gradient: "from-purple-500 to-indigo-500",
-          movies: upcoming.slice(0, 8).map(convertTMDBMovie),
+          movies: upcoming.results.slice(0, 8).map(convertMovie),
         },
       ];
 

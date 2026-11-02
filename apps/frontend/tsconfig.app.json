@@ -24,7 +24,9 @@
 
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@popcornpicks/types": ["../../packages/types/src/index.ts"],
+      "@popcornpicks/api-client": ["../../packages/api-client/src/index.ts"]
     }
   },
   "include": ["src"]

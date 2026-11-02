@@ -31,16 +31,15 @@ export function useWatchlistPage() {
 
         const fetchedMovies = await Promise.all(
           watchlist.map(async (watchlistMovie) => {
-            const movie = await fetchMovieDetails(watchlistMovie.id);
+            // Detail fetch can fail per-title; degrade gracefully to stored fields.
+            const movie = await fetchMovieDetails(watchlistMovie.id).catch(() => null);
             return {
               id: watchlistMovie.id,
               title: watchlistMovie.title,
               poster: watchlistMovie.poster_path
                 ? `https://image.tmdb.org/t/p/w500${watchlistMovie.poster_path}`
                 : "https://via.placeholder.com/500x750/1f2937/9ca3af?text=No+Image",
-              backdrop: movie?.backdrop_path
-                ? `https://image.tmdb.org/t/p/w1280${movie.backdrop_path}`
-                : undefined,
+              backdrop: movie?.backdropUrl,
               rating: watchlistMovie.vote_average
                 ? parseFloat(watchlistMovie.vote_average.toFixed(1))
                 : 0,
@@ -54,7 +53,7 @@ export function useWatchlistPage() {
               userRating: 0,
               dateAdded: new Date().toISOString(),
               watched: false,
-              runtime: movie?.runtime || 0,
+              runtime: movie?.runtimeMinutes || 0,
               overview: movie?.overview || "",
             };
           })

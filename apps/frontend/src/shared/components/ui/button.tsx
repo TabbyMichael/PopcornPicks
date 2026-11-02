@@ -18,6 +18,12 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        // Liquid Glass — translucent frosted surface, subtle edge, no gradient, no shadow.
+        glass:
+          "bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 rounded-lg",
+        // Solid Netflix-red CTA for primary actions (Search, Sign In, Add to Watchlist).
+        "primary-red":
+          "bg-netflix-red hover:bg-netflix-red-hover text-white rounded",
       },
       size: {
         default: "h-10 px-4 py-2",

@@ -11,10 +11,10 @@ import {
   fetchTopRatedMovies,
   fetchUpcomingMovies,
   fetchMovieGenres,
-  TMDBMovie,
-  TMDBGenre,
   getGenreName,
 } from "@/features/browse/services/browse.service";
+import type { Genre, Movie as NormalizedMovie } from "@popcornpicks/types";
+import { posterPathFromUrl } from "@/utils/normalized-poster";
 import { Movie } from "@/features/movies/components/MovieCard";
 import { MovieSection } from "@/features/browse/types";
 
@@ -32,19 +32,22 @@ export function useBrowseMovies() {
   const [error, setError] = useState<string | null>(null);
 
   const [movieSections, setMovieSections] = useState<MovieSection[]>([]);
-  const [genres, setGenres] = useState<TMDBGenre[]>([]);
+  const [genres, setGenres] = useState<Genre[]>([]);
   const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
 
   // Fetch all data
   useEffect(() => {
-    const convertTMDBMovie = (movie: TMDBMovie): Movie => ({
+    const convertMovie = (movie: NormalizedMovie, genreList: Genre[]): Movie => ({
       id: movie.id || 0,
       title: movie.title || "Unknown Title",
-      poster_path: movie.poster_path || null,
-      vote_average: movie.vote_average || 0,
-      release_date: movie.release_date || "",
-      genre_ids: movie.genre_ids || [],
-      genreName: getGenreName(movie.genre_ids, genres),
+      // Recover the CDN path from the absolute URL so cards pick their own size.
+      poster_path: posterPathFromUrl(movie.posterUrl),
+      backdrop_path: posterPathFromUrl(movie.backdropUrl),
+      vote_average: movie.voteAverage || 0,
+      release_date: movie.releaseDate || "",
+      genre_ids: movie.genreIds || [],
+      genreName: getGenreName(movie.genreIds, genreList),
+      video: movie.hasTrailer,
     });
 
     const fetchData = async () => {
@@ -56,7 +59,7 @@ export function useBrowseMovies() {
         const genresData = await fetchMovieGenres();
         setGenres(genresData);
 
-        // Fetch all movie categories
+        // Fetch all movie categories (normalized pages from our API)
         const [trending, popular, topRated, upcoming] = await Promise.all([
           fetchTrendingMovies(),
           fetchPopularMovies(),
@@ -67,30 +70,26 @@ export function useBrowseMovies() {
         const sections: MovieSection[] = [
           {
             title: "Trending Now",
-            movies: trending.slice(0, 20).map((movie: TMDBMovie) => convertTMDBMovie(movie)),
+            movies: trending.results.slice(0, 20).map((m) => convertMovie(m, genresData)),
             icon: TrendingUpIcon,
-            gradient: "from-orange-500 to-red-500",
             description: "What everyone's watching right now",
           },
           {
             title: "Popular Movies",
-            movies: popular.slice(0, 20).map((movie: TMDBMovie) => convertTMDBMovie(movie)),
+            movies: popular.results.slice(0, 20).map((m) => convertMovie(m, genresData)),
             icon: FlameIcon,
-            gradient: "from-pink-500 to-rose-500",
             description: "Most loved by audiences worldwide",
           },
           {
             title: "Top Rated",
-            movies: topRated.slice(0, 20).map((movie: TMDBMovie) => convertTMDBMovie(movie)),
+            movies: topRated.results.slice(0, 20).map((m) => convertMovie(m, genresData)),
             icon: AwardIcon,
-            gradient: "from-yellow-500 to-amber-500",
             description: "Critics' choice and highest rated films",
           },
           {
             title: "Coming Soon",
-            movies: upcoming.slice(0, 20).map((movie: TMDBMovie) => convertTMDBMovie(movie)),
+            movies: upcoming.results.slice(0, 20).map((m) => convertMovie(m, genresData)),
             icon: CalendarIcon,
-            gradient: "from-purple-500 to-indigo-500",
             description: "Upcoming releases to look forward to",
           },
         ];
@@ -106,7 +105,6 @@ export function useBrowseMovies() {
     };
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Update filtered movies when tab or genre changes
@@ -136,8 +134,8 @@ export function useBrowseMovies() {
       }
 
       if (selectedGenre !== "all") {
-        filtered = filtered.filter((movie) =>
-          movie.genreName.toLowerCase().includes(selectedGenre.toLowerCase())
+        filtered = filtered.filter(
+          (movie) => (movie.genreName ?? "").toLowerCase().includes(selectedGenre.toLowerCase())
         );
       }
 

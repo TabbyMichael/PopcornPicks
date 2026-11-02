@@ -66,34 +66,34 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       }
 
       return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-          <Card className="w-full max-w-2xl bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+        <div className="flex min-h-screen items-center justify-center bg-background p-4">
+          <Card className="w-full max-w-2xl border border-white/10 bg-card">
             <CardHeader className="text-center">
-              <div className="flex justify-center mb-4">
-                <div className="p-4 bg-red-500/20 rounded-full">
-                  <AlertCircle className="h-12 w-12 text-red-400" />
+              <div className="mb-4 flex justify-center">
+                <div className="rounded-full bg-destructive/15 p-4">
+                  <AlertCircle className="h-12 w-12 text-destructive" />
                 </div>
               </div>
-              <CardTitle className="text-3xl font-bold text-white">
+              <CardTitle className="text-2xl font-bold text-foreground">
                 Something went wrong
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <p className="text-gray-300 text-center text-lg">
-                We encountered an unexpected error. This has been logged and our team will look into it.
+              <p className="text-center text-muted-foreground">
+                We hit an unexpected error. It has been logged and our team will look into it.
               </p>
 
               {import.meta.env.DEV && this.state.error && (
-                <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700">
-                  <p className="text-red-400 font-mono text-sm mb-2">
+                <div className="rounded-lg border border-white/10 bg-background p-4">
+                  <p className="mb-2 font-mono text-sm text-destructive">
                     {this.state.error.toString()}
                   </p>
                   {this.state.errorInfo && (
                     <details className="mt-2">
-                      <summary className="text-gray-400 text-sm cursor-pointer hover:text-white">
-                        Component Stack
+                      <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
+                        Component stack
                       </summary>
-                      <pre className="mt-2 text-xs text-gray-500 overflow-auto max-h-40">
+                      <pre className="mt-2 max-h-40 overflow-auto text-xs text-muted-foreground">
                         {this.state.errorInfo.componentStack}
                       </pre>
                     </details>
@@ -101,21 +101,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 </div>
               )}
 
-              <div className="flex gap-4 justify-center">
-                <Button
-                  onClick={this.handleReset}
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                >
+              <div className="flex justify-center gap-4">
+                <Button onClick={this.handleReset} variant="primary-red">
                   <RefreshCw className="mr-2 h-4 w-4" />
-                  Try Again
+                  Try again
                 </Button>
-                <Button
-                  onClick={this.handleGoHome}
-                  variant="outline"
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-                >
+                <Button onClick={this.handleGoHome} variant="glass">
                   <Home className="mr-2 h-4 w-4" />
-                  Go Home
+                  Go home
                 </Button>
               </div>
             </CardContent>

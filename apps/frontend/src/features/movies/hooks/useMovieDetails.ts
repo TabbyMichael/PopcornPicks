@@ -6,23 +6,26 @@ import {
   fetchMovieVideos,
   fetchSimilarMovies,
   fetchMovieRecommendations,
-  TMDBMovieDetails,
-  TMDBCredits,
-  TMDBVideos,
-  TMDBMovie,
 } from "@/features/movies/services/movie.service";
+import type {
+  Credit,
+  Movie,
+  MovieDetails,
+  Video,
+} from "@popcornpicks/types";
 
 /**
  * Loads all data for a single movie detail view (details, credits, videos,
- * similar movies and recommendations) and derives the trailer key + director.
+ * similar movies and recommendations) from the normalized API and derives the
+ * trailer key + director.
  */
 export function useMovieDetails() {
   const { id } = useParams<{ id: string }>();
-  const [movie, setMovie] = useState<TMDBMovieDetails | null>(null);
-  const [credits, setCredits] = useState<TMDBCredits | null>(null);
-  const [videos, setVideos] = useState<TMDBVideos | null>(null);
-  const [similarMovies, setSimilarMovies] = useState<TMDBMovie[]>([]);
-  const [recommendations, setRecommendations] = useState<TMDBMovie[]>([]);
+  const [movie, setMovie] = useState<MovieDetails | null>(null);
+  const [credits, setCredits] = useState<Credit[] | null>(null);
+  const [videos, setVideos] = useState<Video[] | null>(null);
+  const [similarMovies, setSimilarMovies] = useState<Movie[]>([]);
+  const [recommendations, setRecommendations] = useState<Movie[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,7 +42,7 @@ export function useMovieDetails() {
           throw new Error("Invalid movie ID");
         }
 
-        const [movieData, creditsData, videosData, similarMoviesData, recommendationsData] =
+        const [movieData, creditsData, videosData, similarData, recommendationsData] =
           await Promise.all([
             fetchMovieDetails(movieId),
             fetchMovieCredits(movieId),
@@ -48,15 +51,11 @@ export function useMovieDetails() {
             fetchMovieRecommendations(movieId),
           ]);
 
-        if (!movieData) {
-          throw new Error("Movie not found");
-        }
-
         setMovie(movieData);
         setCredits(creditsData);
         setVideos(videosData);
-        setSimilarMovies(similarMoviesData);
-        setRecommendations(recommendationsData);
+        setSimilarMovies(similarData.results);
+        setRecommendations(recommendationsData.results);
       } catch (err) {
         console.error("Error fetching movie data:", err);
         setError(err instanceof Error ? err.message : "Failed to load movie data");
@@ -68,19 +67,17 @@ export function useMovieDetails() {
     fetchData();
   }, [id]);
 
-  // Get the main trailer video
-  const getTrailerKey = () => {
-    if (!videos?.results) return null;
-    const trailer = videos.results.find(
-      (video) => video.type === "Trailer" && video.site === "YouTube"
-    );
-    return trailer?.key || videos.results[0]?.key || null;
+  // Main trailer video key (prefers an official YouTube trailer).
+  const getTrailerKey = (): string | null => {
+    if (!videos || videos.length === 0) return null;
+    const trailer = videos.find((video) => video.type === "Trailer" && video.site === "YouTube");
+    return trailer?.key || videos[0]?.key || null;
   };
 
-  // Get director from crew
-  const getDirector = () => {
-    if (!credits?.crew) return "Unknown";
-    const director = credits.crew.find((person) => person.job === "Director");
+  // Director from the flat credits list (crew entries carry `job`).
+  const getDirector = (): string => {
+    if (!credits) return "Unknown";
+    const director = credits.find((person) => person.job === "Director");
     return director?.name || "Unknown";
   };
 

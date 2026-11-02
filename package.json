@@ -10,9 +10,15 @@
   "scripts": {
     "dev": "npm run dev -w @popcornpicks/frontend",
     "dev:frontend": "npm run dev -w @popcornpicks/frontend",
-    "build": "npm run build -w @popcornpicks/frontend",
+    "dev:backend": "npm run dev -w @popcornpicks/backend",
+    "dev:all": "npm run dev:backend & npm run dev:frontend",
+    "build": "npm run build -w @popcornpicks/backend && npm run build -w @popcornpicks/frontend",
     "build:frontend": "npm run build -w @popcornpicks/frontend",
-    "lint": "npm run lint -w @popcornpicks/frontend",
+    "build:backend": "npm run build -w @popcornpicks/backend",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "lint:boundaries": "npm run lint:boundaries -w @popcornpicks/backend",
     "preview": "npm run preview -w @popcornpicks/frontend",
     "prepare": "husky"
   },

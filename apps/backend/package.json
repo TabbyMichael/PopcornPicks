@@ -3,11 +3,41 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Modular Monolith backend (placeholder) - one process, many modules, PostgreSQL-first.",
+  "description": "Modular Monolith backend - one process, many modules, PostgreSQL-first.",
   "scripts": {
-    "dev": "echo 'backend dev (placeholder) - to be implemented'",
-    "build": "echo 'backend build (placeholder) - to be implemented'",
-    "lint": "echo 'backend lint (placeholder) - to be implemented'",
-    "typecheck": "echo 'backend typecheck (placeholder) - to be implemented'"
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint .",
+    "lint:boundaries": "depcruise src --config .dependency-cruiser.cjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:migrate": "node-pg-migrate up -m ../../database/migrations --ignore-patterns 'README.md'",
+    "db:rollback": "node-pg-migrate down -m ../../database/migrations --ignore-patterns 'README.md'",
+    "db:seed": "node --env-file=.env ../../database/seeds/run.ts",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@popcornpicks/types": "*",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.3",
+    "node-pg-migrate": "^9.0.0",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20.0.0",
+    "@types/pg": "^8.23.1",
+    "@types/supertest": "^7.2.1",
+    "dependency-cruiser": "^17.4.3",
+    "eslint": "^9.39.5",
+    "globals": "^15.15.0",
+    "supertest": "^7.3.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^4.1.12"
   }
 }

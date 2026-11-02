@@ -1,1 +1,3 @@
 // recommendations controllers (placeholder)
+
+export {};

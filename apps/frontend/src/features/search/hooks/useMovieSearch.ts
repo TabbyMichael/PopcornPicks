@@ -1,6 +1,21 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import type { Movie } from "@popcornpicks/types";
+import { posterPathFromUrl } from "@/utils/normalized-poster";
 import { fetchMovieGenres, searchMovies } from "@/features/search/services/search.service";
+
+type SearchMovie = {
+  id: number;
+  title: string;
+  poster_path: string | null;
+  vote_average: number;
+  release_date: string;
+  genre_ids: number[];
+  video?: boolean;
+  rating: number;
+  year: number;
+  genre: string;
+};
 
 /**
  * Owns the entire search-page state: URL query params, search query, filters
@@ -12,7 +27,7 @@ export function useMovieSearch() {
   const [selectedGenre, setSelectedGenre] = useState("all");
   const [ratingRange, setRatingRange] = useState([0, 10]);
   const [yearRange, setYearRange] = useState([2000, 2024]);
-  const [filteredMovies, setFilteredMovies] = useState([]);
+  const [filteredMovies, setFilteredMovies] = useState<SearchMovie[]>([]);
   const [loading, setLoading] = useState(false);
   const [genres, setGenres] = useState<{ id: number; name: string }[]>([]);
   const [genreMap, setGenreMap] = useState<Map<number, string>>(new Map());
@@ -35,7 +50,6 @@ export function useMovieSearch() {
     const queryParam = searchParams.get("q");
     if (queryParam) {
       setSearchQuery(queryParam);
-      console.log("Initializing search from URL parameter:", queryParam);
       handleSearch();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -44,29 +58,31 @@ export function useMovieSearch() {
   useEffect(() => {
     const fetchAndFilterMovies = async () => {
       setLoading(true);
-      let movies = [];
+      let movies: Movie[] = [];
       if (searchQuery) {
-        console.log("Searching for:", searchQuery);
-        movies = await searchMovies(searchQuery);
-        console.log("Search results:", movies);
-        console.log("Search results count:", movies.length);
-        if (movies.length === 0) {
-          console.log("No movies found in search results");
+        try {
+          const page = await searchMovies(searchQuery);
+          movies = page.results;
+        } catch (error) {
+          console.error("Error searching movies:", error);
+          movies = [];
         }
       }
 
       let filtered = movies.map((movie) => ({
         id: movie.id,
         title: movie.title,
-        poster_path: movie.poster_path,
-        vote_average: movie.vote_average,
-        release_date: movie.release_date,
-        genre_ids: movie.genre_ids,
-        rating: movie.vote_average ? parseFloat(movie.vote_average.toFixed(1)) : 0,
-        year: movie.release_date ? new Date(movie.release_date).getFullYear() : 0,
+        // Recover the CDN path so MovieCard can pick its own image size.
+        poster_path: posterPathFromUrl(movie.posterUrl),
+        vote_average: movie.voteAverage,
+        release_date: movie.releaseDate,
+        genre_ids: movie.genreIds,
+        video: movie.hasTrailer,
+        rating: movie.voteAverage ? parseFloat(movie.voteAverage.toFixed(1)) : 0,
+        year: movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : 0,
         genre:
-          movie.genre_ids && movie.genre_ids.length > 0
-            ? movie.genre_ids
+          movie.genreIds && movie.genreIds.length > 0
+            ? movie.genreIds
                 .map((id: number) => genreMap.get(id))
                 .filter(Boolean)
                 .join(", ")
@@ -97,7 +113,6 @@ export function useMovieSearch() {
   }, [searchQuery, selectedGenre, ratingRange, yearRange, genreMap]);
 
   const handleSearch = () => {
-    console.log("Handling search for:", searchQuery);
     setSearchParams(searchQuery ? { q: searchQuery } : {});
   };
 

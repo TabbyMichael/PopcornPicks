@@ -5,6 +5,5 @@ export interface MovieSection {
   title: string;
   movies: Movie[];
   icon: React.ComponentType<{ className?: string }>;
-  gradient: string;
   description: string;
 }

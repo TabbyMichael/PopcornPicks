@@ -1,22 +1,26 @@
 
-import { Star, Play, Plus, Check } from "lucide-react";
-import { Card, CardContent } from "@/shared/components/ui/card";
-import { Button } from "@/shared/components/ui/button";
-import { Badge } from "@/shared/components/ui/badge";
+import { Check, Play, Plus, Star } from "lucide-react";
 import { Link } from "react-router-dom";
-import { getImageUrl } from "@/core/api/tmdb";
-import { useWatchlist } from "@/features/watchlist/context/WatchlistContext";
+
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent } from "@/shared/components/ui/card";
 import { useToast } from "@/shared/components/ui/use-toast";
+import { TrailerPlayButton } from "@/shared/components/TrailerPlayButton";
+import { getImageUrl } from "@/utils/format";
+import { useWatchlist } from "@/features/watchlist/context/WatchlistContext";
 
 // Updated interface to match TMDB API structure
 export interface Movie {
   id: number;
   title: string;
   poster_path: string | null;
+  backdrop_path?: string | null;
   vote_average: number;
   release_date: string;
   genre_ids?: number[];
   genreName?: string; // For processed genre name
+  video?: boolean; // TMDB flag: a trailer is available for this movie
 }
 
 interface MovieCardProps {
@@ -24,17 +28,17 @@ interface MovieCardProps {
   showAddToWatchlist?: boolean;
 }
 
+const PLACEHOLDER_POSTER =
+  "https://via.placeholder.com/500x750/1f2937/9ca3af?text=No+Image";
+
 const MovieCard = ({ movie, showAddToWatchlist = true }: MovieCardProps) => {
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
   const { toast } = useToast();
-  
-  // Safety check to ensure movie is defined
-  if (!movie) {
-    return null;
-  }
-  
+
+  if (!movie) return null;
+
   const inWatchlist = isInWatchlist(movie.id);
-  
+
   const handleWatchlistClick = () => {
     if (inWatchlist) {
       removeFromWatchlist(movie.id);
@@ -43,80 +47,86 @@ const MovieCard = ({ movie, showAddToWatchlist = true }: MovieCardProps) => {
         description: `${movie.title} has been removed from your watchlist`,
         variant: "default",
       });
-    } else {
-      addToWatchlist(movie);
-      toast({
-        title: "Added to watchlist",
-        description: `${movie.title} has been added to your watchlist`,
-        variant: "default",
-      });
+      return;
     }
+    addToWatchlist(movie);
+    toast({
+      title: "Added to watchlist",
+      description: `${movie.title} has been added to your watchlist`,
+      variant: "default",
+    });
   };
+
   return (
-    <Card className="group overflow-hidden bg-slate-800/50 border-slate-700 hover:border-purple-500/50 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/20">
+    <Card className="group overflow-hidden border border-white/10 bg-card transition-colors hover:border-white/20">
       <div className="relative aspect-[2/3] overflow-hidden">
         <img
-          src={movie.poster_path ? getImageUrl(movie.poster_path, 'w500') : 'https://via.placeholder.com/500x750/1f2937/9ca3af?text=No+Image'}
+          src={movie.poster_path ? getImageUrl(movie.poster_path, "w500") : PLACEHOLDER_POSTER}
           alt={movie.title}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+          className="h-full w-full object-cover"
           onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = 'https://via.placeholder.com/500x750/1f2937/9ca3af?text=No+Image';
+            const target = e.currentTarget;
+            if (target.src !== PLACEHOLDER_POSTER) target.src = PLACEHOLDER_POSTER;
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        
-        {/* Enhanced Overlay Actions */}
-        <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
-          <div className="flex gap-2">
-            <Link to={`/movie/${movie.id}`} className="flex-1">
-              <Button size="sm" className="w-full bg-white/20 backdrop-blur-md hover:bg-white/30 text-white border-white/20 transition-all duration-300">
-                <Play className="h-3 w-3 mr-1" />
-                Details
-              </Button>
-            </Link>
-            {showAddToWatchlist && (
-              <Button 
-                size="sm" 
-                variant="outline" 
-                onClick={handleWatchlistClick}
-                className={`backdrop-blur-md transition-all duration-300 hover:scale-110 ${inWatchlist ? 'bg-green-600/80 hover:bg-green-700/80 text-white border-green-600/80' : 'bg-white/20 hover:bg-white/30 text-white border-white/20'}`}
-              >
-                {inWatchlist ? <Check className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
-              </Button>
-            )}
-          </div>
-        </div>
-        
-        {/* Enhanced Rating Badge */}
-        <div className="absolute top-3 right-3">
-          <Badge className="bg-black/70 backdrop-blur-md text-white border-white/20 transition-all duration-300 group-hover:scale-110">
-            <Star className="h-3 w-3 mr-1 fill-yellow-400 text-yellow-400" />
-            {movie.vote_average.toFixed(1)}
-          </Badge>
-        </div>
+        {/* Readability scrim for overlays */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/90 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
 
-        {/* Genre Pill */}
-        <div className="absolute top-3 left-3">
-          {movie.genreName && (
-            <Badge variant="secondary" className="bg-purple-600/80 backdrop-blur-md text-white border-0 transition-all duration-300 group-hover:scale-110">
-              {movie.genreName}
-            </Badge>
+        {/* Rating pill */}
+        <Badge className="absolute right-3 top-3 border border-white/10 bg-black/70 text-white backdrop-blur-sm">
+          <Star className="mr-1 h-3 w-3 fill-netflix-red text-netflix-red" />
+          {movie.vote_average.toFixed(1)}
+        </Badge>
+
+        {/* Genre pill */}
+        {movie.genreName && (
+          <Badge
+            variant="secondary"
+            className="absolute left-3 top-3 border border-white/10 bg-black/60 text-white/90 backdrop-blur-sm"
+          >
+            {movie.genreName}
+          </Badge>
+        )}
+
+        {/* Hover actions */}
+        <div className="absolute inset-x-4 bottom-4 flex translate-y-2 gap-2 opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
+          <Link to={`/movie/${movie.id}`} className="flex-1">
+            <Button size="sm" variant="glass" className="w-full gap-1">
+              <Play className="h-3 w-3" />
+              Details
+            </Button>
+          </Link>
+          <TrailerPlayButton
+            movieId={movie.id}
+            movieTitle={movie.title}
+            label=""
+            variant="primary-red"
+            size="sm"
+            className="px-2"
+            aria-label={`Play trailer for ${movie.title}`}
+          />
+          {showAddToWatchlist && (
+            <Button
+              size="sm"
+              variant={inWatchlist ? "primary-red" : "glass"}
+              onClick={handleWatchlistClick}
+              aria-label={inWatchlist ? "Remove from watchlist" : "Add to watchlist"}
+            >
+              {inWatchlist ? <Check className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
+            </Button>
           )}
         </div>
       </div>
-      
+
       <CardContent className="p-4">
         <Link to={`/movie/${movie.id}`}>
-          <h3 className="font-semibold text-white truncate hover:text-purple-400 transition-colors duration-300">
+          <h3 className="truncate font-semibold text-foreground transition-colors hover:text-netflix-red">
             {movie.title}
           </h3>
         </Link>
-        <div className="flex items-center justify-between mt-2">
-          <span className="text-sm text-gray-400">
-            {movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A'}
-          </span>
-        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {movie.release_date ? new Date(movie.release_date).getFullYear() : "N/A"}
+        </p>
       </CardContent>
     </Card>
   );

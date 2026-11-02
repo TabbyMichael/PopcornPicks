@@ -1,15 +1,43 @@
-import { Search, TrendingUp, Star, Crown, Calendar, Filter, Grid, List, Sparkles, Flame, Award, Clock, ArrowRight, Play, Eye } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import { Badge } from "@/shared/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { Link } from "react-router-dom";
-import Navigation from "@/shared/components/Navigation";
+import {
+  Award,
+  Calendar,
+  Eye,
+  Filter,
+  Flame,
+  Grid,
+  List,
+  Play,
+  Search,
+  Star,
+  TrendingUp,
+} from "lucide-react";
+
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Card } from "@/shared/components/ui/card";
+import { Input } from "@/shared/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import MovieCard from "@/features/movies/components/MovieCard";
-import Footer from "@/shared/components/Footer";
 import { useBrowseMovies } from "@/features/browse/hooks/useBrowseMovies";
+import { getImageUrl } from "@/utils/format";
+
+const PLACEHOLDER_POSTER =
+  "https://via.placeholder.com/500x750/1f2937/9ca3af?text=No+Image";
+
+const TABS = [
+  { value: "trending", label: "Trending", icon: TrendingUp },
+  { value: "popular", label: "Popular", icon: Flame },
+  { value: "top-rated", label: "Top Rated", icon: Award },
+  { value: "upcoming", label: "Upcoming", icon: Calendar },
+];
 
 const BrowsePage = () => {
   const {
@@ -23,319 +51,192 @@ const BrowsePage = () => {
     setActiveTab,
     loading,
     error,
-    movieSections,
     genres,
     filteredMovies,
   } = useBrowseMovies();
 
-  const handleSearch = () => {
-    // Search functionality is handled by useEffect
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900">
-        <Navigation />
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-500 mx-auto mb-4"></div>
-            <p className="text-white text-lg">Loading amazing movies...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900">
-        <Navigation />
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-white mb-4">Oops!</h1>
-            <p className="text-gray-300 mb-8">{error}</p>
-            <Button onClick={() => window.location.reload()} className="bg-gradient-to-r from-purple-600 to-pink-600">
-              Try Again
-            </Button>
-          </div>
-        </div>
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-bold text-foreground">Something went wrong</h1>
+        <p className="mt-4 text-muted-foreground">{error}</p>
+        <Button
+          variant="primary-red"
+          className="mt-6"
+          onClick={() => window.location.reload()}
+        >
+          Try again
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900">
-      <Navigation />
-      
-      {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900">
-        {/* Cinematic Background */}
-        <div className="absolute inset-0">
-          <img
-            src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1920&h=1080&fit=crop"
-            alt="Cinema background"
-            className="w-full h-full object-cover opacity-20"
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-foreground sm:text-4xl">Browse movies</h1>
+        <p className="mt-2 text-muted-foreground">
+          Trending, popular, top rated, and upcoming — filter by genre or search by title.
+        </p>
+      </div>
+
+      {/* Search + Filters */}
+      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search by title..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-10 pl-10 bg-card border-border"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80" />
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-900/40 to-pink-900/40" />
-          {/* Floating particles effect */}
-          <div className="absolute inset-0">
-            <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-purple-400 rounded-full opacity-60 animate-pulse"></div>
-            <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-pink-400 rounded-full opacity-40 animate-ping"></div>
-            <div className="absolute bottom-1/4 left-1/3 w-1.5 h-1.5 bg-blue-400 rounded-full opacity-50 animate-pulse" style={{animationDelay: '1s'}}></div>
-            <div className="absolute top-1/2 right-1/4 w-1 h-1 bg-purple-300 rounded-full opacity-30 animate-ping" style={{animationDelay: '2s'}}></div>
-          </div>
-        </div>
-        
-        <div className="relative container mx-auto px-4 py-20 sm:px-6 lg:px-8">
-          <div className="text-center max-w-5xl mx-auto">
-            {/* Animated icon with glow */}
-            <div className="flex justify-center mb-8">
-              <div className="relative group">
-                <div className="absolute -inset-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full blur-xl opacity-30 group-hover:opacity-50 animate-pulse"></div>
-                <div className="relative p-6 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
-                  <Search className="h-16 w-16 text-purple-400" />
-                </div>
-              </div>
-            </div>
-            
-            {/* Main title with enhanced gradient */}
-            <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight">
-              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-pulse">
-                Browse Movies
-              </span>
-            </h1>
-            
-            <p className="text-2xl md:text-3xl text-gray-300 mb-12 leading-relaxed max-w-4xl mx-auto">
-              Discover your next favorite film from our vast collection of 
-              <span className="text-purple-400 font-semibold"> trending</span>,
-              <span className="text-pink-400 font-semibold"> popular</span>, and
-              <span className="text-yellow-400 font-semibold"> critically acclaimed</span> movies
-            </p>
-            
-            {/* Enhanced Search Bar */}
-            <div className="max-w-3xl mx-auto mb-8">
-              <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
-                <div className="relative flex gap-2 bg-black/50 backdrop-blur-md rounded-2xl p-3 border border-white/20">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-4 top-1/2 h-6 w-6 -translate-y-1/2 text-gray-400" />
-                    <Input
-                      type="text"
-                      placeholder="Search movies by title..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="h-16 pl-14 bg-transparent border-0 text-white placeholder:text-gray-400 focus:ring-0 focus:outline-none text-xl"
-                    />
-                  </div>
-                  <Button 
-                    size="lg" 
-                    onClick={handleSearch}
-                    className="h-16 px-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-xl text-lg font-semibold"
-                  >
-                    <Search className="h-6 w-6" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-            
-            {/* Quick stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
-              {movieSections.map((section, index) => (
-                <div key={index} className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 hover:border-purple-400/50 transition-all duration-300">
-                  <div className="text-2xl font-bold text-white mb-1">{section.movies.length}</div>
-                  <div className="text-sm text-gray-300">{section.title}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-16 sm:px-6 lg:px-8">
-        {/* Controls Section */}
-        <div className="mb-12">
-          <div className="bg-slate-800/30 backdrop-blur-md rounded-3xl p-8 border border-slate-700/50 shadow-xl">
-            <div className="flex flex-col lg:flex-row gap-6 items-center justify-between mb-8">
-              <div className="flex gap-4 items-center flex-wrap">
-                <Select value={selectedGenre} onValueChange={setSelectedGenre}>
-                  <SelectTrigger className="w-52 h-12 bg-white/10 border-white/20 text-white rounded-xl hover:bg-white/15 transition-colors">
-                    <Filter className="h-5 w-5 mr-2" />
-                    <SelectValue placeholder="Filter by Genre" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="all">All Genres</SelectItem>
-                    {genres.map((genre) => (
-                      <SelectItem key={genre.id} value={genre.name.toLowerCase()}>
-                        {genre.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                <div className="flex bg-white/10 rounded-xl p-1 border border-white/20">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setViewMode("grid")}
-                    className={`h-10 px-4 rounded-lg transition-all ${
-                      viewMode === "grid" 
-                        ? "bg-purple-500 text-white shadow-lg" 
-                        : "text-gray-400 hover:text-white hover:bg-white/10"
-                    }`}
-                  >
-                    <Grid className="h-5 w-5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setViewMode("list")}
-                    className={`h-10 px-4 rounded-lg transition-all ${
-                      viewMode === "list" 
-                        ? "bg-purple-500 text-white shadow-lg" 
-                        : "text-gray-400 hover:text-white hover:bg-white/10"
-                    }`}
-                  >
-                    <List className="h-5 w-5" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-            
-            {/* Enhanced Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4 bg-white/10 rounded-2xl p-1 border border-white/20">
-                <TabsTrigger 
-                  value="trending" 
-                  className="rounded-xl text-white data-[state=active]:bg-orange-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
-                >
-                  <TrendingUp className="h-4 w-4 mr-2" />
-                  Trending
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="popular" 
-                  className="rounded-xl text-white data-[state=active]:bg-pink-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
-                >
-                  <Flame className="h-4 w-4 mr-2" />
-                  Popular
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="top-rated" 
-                  className="rounded-xl text-white data-[state=active]:bg-yellow-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
-                >
-                  <Award className="h-4 w-4 mr-2" />
-                  Top Rated
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="upcoming" 
-                  className="rounded-xl text-white data-[state=active]:bg-purple-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
-                >
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Upcoming
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
         </div>
 
-        {/* Movies Display */}
-        {filteredMovies.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="relative mb-8">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-32 h-32 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-full animate-pulse"></div>
-              </div>
-              <div className="relative mx-auto h-32 w-32 rounded-full bg-slate-800/50 backdrop-blur-sm flex items-center justify-center border border-slate-700/50 shadow-xl">
-                <Search className="h-16 w-16 text-purple-400" />
-              </div>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">No movies found</h2>
-            <p className="text-xl text-gray-400 mb-8 max-w-md mx-auto leading-relaxed">
-              Try adjusting your search terms or filters to discover more movies
-            </p>
-            <Button 
-              onClick={() => {
-                setSearchQuery("");
-                setSelectedGenre("all");
-              }}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-full px-8 py-4 text-lg font-semibold"
-            >
-              Clear Filters
-            </Button>
-          </div>
-        ) : (
-          <div className={viewMode === "grid" 
-            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" 
-            : "space-y-4"
-          }>
-            {filteredMovies.filter(movie => movie && movie.id).map((movie, index) => (
-              <div
-                key={movie.id}
-                className="transition-all duration-500 hover:scale-105"
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                {viewMode === "grid" ? (
-                  <MovieCard movie={movie} />
-                ) : (
-                  // List view implementation
-                  <Card className="group overflow-hidden bg-slate-800/50 border-slate-700 hover:border-purple-500/50 transition-all duration-300">
-                    <div className="flex">
-                      <div className="relative w-24 h-36 flex-shrink-0">
-                        <img
-                          src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : 'https://via.placeholder.com/500x750/1f2937/9ca3af?text=No+Image'}
-                          alt={movie.title}
-                          className="h-full w-full object-cover rounded-l"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = 'https://via.placeholder.com/500x750/1f2937/9ca3af?text=No+Image';
-                          }}
-                        />
-                      </div>
-                      <div className="flex-1 p-4 flex flex-col justify-between">
-                        <div>
-                          <div className="flex items-start justify-between mb-2">
-                            <div>
-                              <h3 className="font-semibold text-white text-lg mb-1">{movie.title}</h3>
-                              <div className="flex items-center gap-4 text-sm text-gray-400">
-                                <div className="flex items-center gap-1">
-                                  <Calendar className="h-4 w-4" />
-                                  {movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A'}
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                  {movie.vote_average.toFixed(1)}
-                                </div>
-                                <Badge variant="secondary" className="bg-purple-900/50 text-purple-300">
-                                  {movie.genreName}
-                                </Badge>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex gap-2">
-                            <Link to={`/movie/${movie.id}`}>
-                              <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10">
-                                <Play className="h-4 w-4 mr-1" />
-                                Details
-                              </Button>
-                            </Link>
-                            <Button size="sm" variant="outline" className="border-pink-500/50 text-pink-400 hover:bg-pink-500/10">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                )}
-              </div>
+        <Select value={selectedGenre} onValueChange={setSelectedGenre}>
+          <SelectTrigger className="w-full md:w-52 h-10 bg-card border-border">
+            <Filter className="mr-2 h-4 w-4" />
+            <SelectValue placeholder="Filter by genre" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All genres</SelectItem>
+            {genres.map((g) => (
+              <SelectItem key={g.id} value={g.name.toLowerCase()}>
+                {g.name}
+              </SelectItem>
             ))}
-          </div>
-        )}
+          </SelectContent>
+        </Select>
+
+        <div className="inline-flex rounded-md border border-border bg-card p-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setViewMode("grid")}
+            className={viewMode === "grid" ? "bg-secondary text-foreground" : "text-muted-foreground"}
+            aria-label="Grid view"
+          >
+            <Grid className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setViewMode("list")}
+            className={viewMode === "list" ? "bg-secondary text-foreground" : "text-muted-foreground"}
+            aria-label="List view"
+          >
+            <List className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
-      
-      <Footer />
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
+        <TabsList className="grid w-full max-w-2xl grid-cols-4 bg-card border border-border">
+          {TABS.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="gap-2 data-[state=active]:bg-netflix-red data-[state=active]:text-white"
+              >
+                <Icon className="h-4 w-4" />
+                <span className="hidden sm:inline">{tab.label}</span>
+              </TabsTrigger>
+            );
+          })}
+        </TabsList>
+      </Tabs>
+
+      {/* Movies */}
+      {loading ? (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div key={i} className="aspect-[2/3] w-full rounded bg-muted" />
+          ))}
+        </div>
+      ) : filteredMovies.length === 0 ? (
+        <div className="py-16 text-center">
+          <h2 className="text-xl font-semibold text-foreground">No movies found</h2>
+          <p className="mt-2 text-muted-foreground">
+            Try a different search term or clear your filters.
+          </p>
+          <Button
+            variant="glass"
+            className="mt-6"
+            onClick={() => {
+              setSearchQuery("");
+              setSelectedGenre("all");
+            }}
+          >
+            Clear filters
+          </Button>
+        </div>
+      ) : viewMode === "grid" ? (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {filteredMovies
+            .filter((m) => m && m.id)
+            .map((movie) => (
+              <MovieCard key={movie.id} movie={movie} />
+            ))}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filteredMovies
+            .filter((m) => m && m.id)
+            .map((movie) => (
+              <Card
+                key={movie.id}
+                className="flex overflow-hidden border border-white/10 bg-card p-0 hover:border-white/20 transition-colors"
+              >
+                <div className="h-32 w-24 flex-shrink-0 overflow-hidden">
+                  <img
+                    src={movie.poster_path ? getImageUrl(movie.poster_path, "w200") : PLACEHOLDER_POSTER}
+                    alt={movie.title}
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      const t = e.currentTarget;
+                      if (t.src !== PLACEHOLDER_POSTER) t.src = PLACEHOLDER_POSTER;
+                    }}
+                  />
+                </div>
+                <div className="flex flex-1 flex-col justify-between p-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground">{movie.title}</h3>
+                    <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                      <span className="inline-flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        {movie.release_date ? new Date(movie.release_date).getFullYear() : "N/A"}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <Star className="h-4 w-4 fill-netflix-red text-netflix-red" />
+                        {movie.vote_average.toFixed(1)}
+                      </span>
+                      {movie.genreName && (
+                        <Badge variant="secondary" className="bg-secondary text-secondary-foreground">
+                          {movie.genreName}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <Link to={`/movie/${movie.id}`}>
+                      <Button size="sm" variant="glass" className="gap-1">
+                        <Play className="h-3 w-3" />
+                        Details
+                      </Button>
+                    </Link>
+                    <Button size="sm" variant="glass" aria-label="Preview">
+                      <Eye className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+        </div>
+      )}
     </div>
   );
 };

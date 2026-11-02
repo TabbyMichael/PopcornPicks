@@ -1,1 +1,3 @@
 // ratings controllers (placeholder)
+
+export {};

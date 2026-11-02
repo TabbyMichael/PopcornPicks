@@ -1,1 +1,3 @@
 // notifications controllers (placeholder)
+
+export {};
