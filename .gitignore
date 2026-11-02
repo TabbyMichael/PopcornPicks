@@ -15,6 +15,9 @@ coverage/
 .env
 .env.local
 .env.*.local
+.env.production
+.env.development
+.env.test
 
 # OS / editor
 .DS_Store

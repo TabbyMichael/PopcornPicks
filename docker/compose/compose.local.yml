@@ -1,0 +1,39 @@
+# Local Development Docker Compose Configuration
+# Purpose: Additional local development tools and debugging utilities
+# Usage: docker compose -f docker/compose/compose.dev.yml -f docker/compose/compose.local.yml up
+
+version: '3.9'
+
+services:
+  # pgAdmin for PostgreSQL management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: popcornpicks-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@popcornpicks.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    networks:
+      - database
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  # Mailhog for email testing
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: popcornpicks-mailhog
+    ports:
+      - "${MAILHOG_SMTP_PORT:-1025}:1025"
+      - "${MAILHOG_WEB_PORT:-8025}:8025"
+    networks:
+      - backend
+    restart: unless-stopped
+
+networks:
+  database:
+    external: true
+  backend:
+    external: true

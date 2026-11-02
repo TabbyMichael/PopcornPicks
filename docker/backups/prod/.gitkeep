@@ -1,0 +1,3 @@
+# Production backups directory
+# In production, backups should be stored in cloud storage (S3, GCS, etc.)
+# This directory is for local backup storage only

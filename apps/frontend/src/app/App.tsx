@@ -23,6 +23,7 @@ import TermsOfServicePage from "@/features/legal/pages/TermsOfServicePage";
 import CookiePolicyPage from "@/features/legal/pages/CookiePolicyPage";
 import NotFoundPage from "@/features/not-found/pages/NotFoundPage";
 import { WatchlistProvider } from "@/features/watchlist/context/WatchlistContext";
+import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -77,13 +78,9 @@ const NavigationLoader = ({ children }: { children: React.ReactNode }) => {
     if (location.pathname !== displayLocation.pathname) {
       setIsLoading(true);
       
-      // Simulate loading time for better UX (minimum 500ms, maximum 1000ms)
-      const timer = setTimeout(() => {
-        setDisplayLocation(location);
-        setIsLoading(false);
-      }, Math.max(500, Math.min(1000, Math.random() * 800 + 200)));
-      
-      return () => clearTimeout(timer);
+      // Update location immediately (no artificial delay)
+      setDisplayLocation(location);
+      setIsLoading(false);
     }
   }, [location, displayLocation]);
 
@@ -98,9 +95,10 @@ const NavigationLoader = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <WatchlistProvider>
-      <TooltipProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <WatchlistProvider>
+        <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
@@ -128,6 +126,7 @@ const App = () => (
     </TooltipProvider>
     </WatchlistProvider>
   </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

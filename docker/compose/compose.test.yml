@@ -1,0 +1,71 @@
+# Testing Docker Compose Configuration
+# Purpose: Automated testing environment with isolated database
+# Usage: docker compose -f docker/compose/compose.test.yml up --abort-on-container-exit
+
+version: '3.9'
+
+services:
+  # PostgreSQL for testing
+  postgres-test:
+    build:
+      context: ../../images/postgres
+      dockerfile: Dockerfile
+    container_name: popcornpicks-postgres-test
+    environment:
+      POSTGRES_DB: ${POSTGRES_TEST_DB:-popcornpicks_test}
+      POSTGRES_USER: ${POSTGRES_USER:-popcornpicks}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-test_password}
+      POSTGRES_HOST_AUTH_METHOD: trust
+    tmpfs:
+      - /var/lib/postgresql/data
+    networks:
+      - backend
+      - database
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-popcornpicks}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Backend test runner
+  backend-test:
+    build:
+      context: ../../images/backend
+      dockerfile: Dockerfile
+      target: test
+    container_name: popcornpicks-backend-test
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://${POSTGRES_USER:-popcornpicks}:${POSTGRES_PASSWORD:-test_password}@postgres-test:5432/${POSTGRES_TEST_DB:-popcornpicks_test}
+      TMDB_API_KEY: ${TMDB_API_KEY}
+    volumes:
+      - ../../apps/backend:/app:ro
+      - /app/node_modules
+    networks:
+      - backend
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+
+  # Frontend test runner
+  frontend-test:
+    build:
+      context: ../../images/frontend
+      dockerfile: Dockerfile
+      target: test
+    container_name: popcornpicks-frontend-test
+    environment:
+      NODE_ENV: test
+    volumes:
+      - ../../apps/frontend:/app:ro
+      - /app/node_modules
+    networks:
+      - frontend
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+  database:
+    driver: bridge

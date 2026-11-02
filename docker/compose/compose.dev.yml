@@ -1,0 +1,150 @@
+# Development Docker Compose Configuration
+# Purpose: Local development environment with hot-reload and debugging
+# Usage: docker compose -f docker/compose/compose.dev.yml up
+
+version: '3.9'
+
+services:
+  # PostgreSQL with all required extensions
+  postgres:
+    build:
+      context: ../../images/postgres
+      dockerfile: Dockerfile
+    container_name: popcornpicks-postgres-dev
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-popcornpicks_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-popcornpicks}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev_password}
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+      - ../../database:/docker-entrypoint-initdb.d:ro
+      - postgres_backups_dev:/backups
+    networks:
+      - backend
+      - database
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-popcornpicks}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Backend API
+  backend:
+    build:
+      context: ../../images/backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: popcornpicks-backend-dev
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://${POSTGRES_USER:-popcornpicks}:${POSTGRES_PASSWORD:-dev_password}@postgres:5432/${POSTGRES_DB:-popcornpicks_dev}
+      TMDB_API_KEY: ${TMDB_API_KEY}
+      PORT: 3001
+    ports:
+      - "${BACKEND_PORT:-3001}:3001"
+    volumes:
+      - ../../apps/backend:/app:ro
+      - /app/node_modules
+    networks:
+      - backend
+      - frontend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Frontend
+  frontend:
+    build:
+      context: ../../images/frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: popcornpicks-frontend-dev
+    environment:
+      NODE_ENV: development
+      VITE_API_URL: http://localhost:${BACKEND_PORT:-3001}
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    volumes:
+      - ../../apps/frontend:/app:ro
+      - /app/node_modules
+    networks:
+      - frontend
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5173"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Admin Panel
+  admin:
+    build:
+      context: ../../images/admin
+      dockerfile: Dockerfile
+      target: development
+    container_name: popcornpicks-admin-dev
+    environment:
+      NODE_ENV: development
+      VITE_API_URL: http://localhost:${BACKEND_PORT:-3001}
+    ports:
+      - "${ADMIN_PORT:-5174}:5173"
+    volumes:
+      - ../../apps/admin:/app:ro
+      - /app/node_modules
+    networks:
+      - frontend
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5173"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Background Worker
+  worker:
+    build:
+      context: ../../images/worker
+      dockerfile: Dockerfile
+      target: development
+    container_name: popcornpicks-worker-dev
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://${POSTGRES_USER:-popcornpicks}:${POSTGRES_PASSWORD:-dev_password}@postgres:5432/${POSTGRES_DB:-popcornpicks_dev}
+      TMDB_API_KEY: ${TMDB_API_KEY}
+    volumes:
+      - ../../apps/backend:/app:ro
+      - /app/node_modules
+    networks:
+      - backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+  database:
+    driver: bridge
+
+volumes:
+  postgres_data_dev:
+    driver: local
+  postgres_backups_dev:
+    driver: local

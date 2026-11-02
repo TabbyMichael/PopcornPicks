@@ -1,13 +1,40 @@
 # Extensions
 
-PostgreSQL extensions we prepare for. Each subfolder documents how to enable
-and use the extension for PopcornPicks.
+PostgreSQL extensions that power the application platform. Each extension lives in its own folder with `README.md`, `install.sql`, `configuration.sql`, and `uninstall.sql`.
 
-- `pgvector/` - vector similarity for AI-powered recommendations
-- `postgis/` - geospatial (e.g. nearby cinemas / events)
-- `pg_trgm/` - fuzzy text search
-- `pg_cron/` - scheduled jobs to refresh materialized views / sync TMDB
-- `pgmq/` - lightweight Postgres-backed message queue (job/event processing)
-- `uuid/` - UUIDv7 / gen_random_uuid identifiers
+## Supported Extensions
 
-> Extensions are opt-in per environment. Enable only what a given env needs.
+| Extension | Purpose | Folder |
+| --- | --- | --- |
+| `pgvector` | Vector search, embeddings, nearest-neighbour | `pgvector/` |
+| `postgis` | Geospatial queries, radius, bounding boxes | `postgis/` |
+| `pg_trgm` | Fuzzy text search, trigram indexes | `pg_trgm/` |
+| `pg_cron` | Scheduled jobs | `pg_cron/` |
+| `pgmq` | Message queues | `pgmq/` |
+| `uuid-ossp` | UUID generation | `uuid/` |
+| `pgcrypto` | Hashing, encryption | `pgcrypto/` |
+| `citext` | Case-insensitive text | `citext/` |
+| `hstore` | Key-value storage | `hstore/` |
+| `btree_gin` | Composite GIN indexes | `btree_gin/` |
+| `btree_gist` | Composite GiST indexes | `btree_gist/` |
+| `tablefunc` | Crosstab / pivot analytics | `tablefunc/` |
+| `ltree` | Hierarchical data | `ltree/` |
+| `intarray` | Integer array operations | `intarray/` |
+| `pg_stat_statements` | Query performance monitoring | `pg_stat_statements/` |
+
+## File Conventions
+
+Each extension folder contains:
+
+- `README.md` — purpose, usage, configuration notes
+- `install.sql` — `CREATE EXTENSION` statement
+- `configuration.sql` — extension-specific configuration
+- `uninstall.sql` — `DROP EXTENSION` statement
+
+## Installation
+
+Extensions are installed during bootstrap via `bootstrap/001_extensions.sql`, which references the install scripts in this folder.
+
+## Uninstallation
+
+To remove an extension, run its `uninstall.sql`. Note that dropping an extension may fail if dependent objects exist.

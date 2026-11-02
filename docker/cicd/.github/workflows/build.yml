@@ -1,0 +1,89 @@
+name: Build Docker Images
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build frontend image
+        run: |
+          docker build -f docker/images/frontend/Dockerfile -t popcornpicks/frontend:${{ github.sha }} docker/images/frontend
+
+      - name: Run frontend tests
+        run: |
+          docker build --target test -f docker/images/frontend/Dockerfile docker/images/frontend
+
+  build-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build backend image
+        run: |
+          docker build -f docker/images/backend/Dockerfile -t popcornpicks/backend:${{ github.sha }} docker/images/backend
+
+      - name: Run backend tests
+        run: |
+          docker build --target test -f docker/images/backend/Dockerfile docker/images/backend
+
+  build-admin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build admin image
+        run: |
+          docker build -f docker/images/admin/Dockerfile -t popcornpicks/admin:${{ github.sha }} docker/images/admin
+
+      - name: Run admin tests
+        run: |
+          docker build --target test -f docker/images/admin/Dockerfile docker/images/admin
+
+  build-postgres:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build postgres image
+        run: |
+          docker build -f docker/images/postgres/Dockerfile -t popcornpicks/postgres:${{ github.sha }} docker/images/postgres
+
+  build-worker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build worker image
+        run: |
+          docker build -f docker/images/worker/Dockerfile -t popcornpicks/worker:${{ github.sha }} docker/images/worker
+
+      - name: Run worker tests
+        run: |
+          docker build --target test -f docker/images/worker/Dockerfile docker/images/worker

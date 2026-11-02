@@ -17,13 +17,16 @@ many independent modules that can each be extracted into a microservice later
 |-- database/       PostgreSQL-first: schema, migrations, seeds,
 |                   functions, triggers, views, materialized views, policies,
 |                   extensions (pgvector, postgis, pg_trgm, pg_cron, pgmq, uuid)
-|-- docker/         containerization (prepared, not implemented)
+|                   Platform modules (security, messaging, scheduler, vector, geospatial, audit, monitoring, performance, backup, restore)
+|                   Domain modules (movies, users, authentication, watchlists, favorites, reviews, ratings, recommendations, search, notifications, analytics, administration, system)
+|-- docker/         Complete Docker platform with compose files, images, scripts, monitoring, CI/CD
 |-- docs/           architecture, api, database, deployment, decisions (ADRs), contributing
 |-- scripts/        repo automation (placeholder)
 `-- tools/          developer tooling (placeholder)
 ```
 
 ### Design decisions (see `docs/decisions/`)
+
 - **Modular Monolith over microservices** (ADR-0001)
 - **PostgreSQL-first** single data store - no Redis / MongoDB / Elasticsearch / Kafka (ADR-0002)
 - **All external APIs (TMDB, AI) are hidden behind the backend** (ADR-0003)
@@ -35,6 +38,24 @@ many independent modules that can each be extracted into a microservice later
 - A TMDB API key (see `docs/tmdb-setup.md`)
 
 ## Getting started
+
+### Development with Docker
+
+```sh
+# 1. Copy environment file
+cp docker/configs/.env.example .env
+
+# 2. Start all services (PostgreSQL, backend, frontend, admin)
+docker/scripts/start.sh dev
+
+# 3. Access services
+# Frontend: http://localhost:5173
+# Backend: http://localhost:3001
+# Admin: http://localhost:5174
+# pgAdmin: http://localhost:5050 (optional)
+```
+
+### Development without Docker
 
 ```sh
 # 1. Install dependencies (installs all apps/* and packages/* workspaces)

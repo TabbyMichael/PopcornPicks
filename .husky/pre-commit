@@ -1,0 +1,19 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Check for potential secrets in staged files
+echo "Checking for potential secrets in staged files..."
+
+# Check for common secret patterns
+if git diff --cached --name-only | xargs grep -l "API_KEY\|SECRET\|PASSWORD\|TOKEN\|api_key\|secret\|password\|token" 2>/dev/null; then
+  echo "⚠️  WARNING: Potential secrets detected in staged files!"
+  echo "Please review before committing."
+  echo ""
+  echo "Files with potential secrets:"
+  git diff --cached --name-only | xargs grep -l "API_KEY\|SECRET\|PASSWORD\|TOKEN\|api_key\|secret\|password\|token" 2>/dev/null
+  echo ""
+  echo "If these are false positives, use --no-verify to bypass (not recommended)."
+  exit 1
+fi
+
+echo "✅ No secrets detected in staged files"

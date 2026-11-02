@@ -1,0 +1,103 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight
+
+jobs:
+  vulnerability-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  dependency-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run npm audit
+        run: |
+          cd apps/backend && npm audit --audit-level=high || true
+          cd apps/frontend && npm audit --audit-level=high || true
+          cd apps/admin && npm audit --audit-level=high || true
+
+  docker-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build images
+        run: |
+          docker build -t popcornpicks/frontend:test docker/images/frontend
+          docker build -t popcornpicks/backend:test docker/images/backend
+          docker build -t popcornpicks/admin:test docker/images/admin
+          docker build -t popcornpicks/postgres:test docker/images/postgres
+          docker build -t popcornpicks/worker:test docker/images/worker
+
+      - name: Run Trivy on Docker images
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'popcornpicks/frontend:test'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Run Trivy on Docker images
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'popcornpicks/backend:test'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Run Trivy on Docker images
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'popcornpicks/admin:test'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Run Trivy on Docker images
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'popcornpicks/postgres:test'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Run Trivy on Docker images
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'popcornpicks/worker:test'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'

@@ -1,0 +1,9 @@
+# Docker Compose Override Configuration
+# Purpose: Local development overrides that apply to all environments
+# Usage: Automatically loaded by docker compose (no -f flag needed)
+# This file should be gitignored for local customizations
+
+version: '3.9'
+
+# Add local overrides here
+# Example: volume mounts for hot-reload, custom ports, debugging tools
